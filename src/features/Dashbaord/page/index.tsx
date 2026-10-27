@@ -1,24 +1,35 @@
-import { DashboardLayout } from "../components/DashboardLayout";
 import { WelcomeHeader } from "../components/WelcomeHeader";
-import { StatCards } from "../components/StatsCards";
+import { HeroCard } from "../components/HeroCard";
+import { QuickStats } from "../components/QuickStats";
+import { QuickActions } from "../components/QuickActions";
 import { RecentTransactions } from "../components/RecentTransactions";
-import { PromoCard } from "../components/PromoCard";
+import { RightSidebarWidgets } from "../components/RightSidebarWidgets";
 
-export function DashboardPage() {
+export default function DashboardPage() {
     return (
-        <DashboardLayout>
+        <div className="animate-in fade-in duration-300">
             <WelcomeHeader />
-            <StatCards />
 
-            {/* Bottom Grid Layout */}
+            {/* Main Grid Layout */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2">
+
+                {/* Left Column (Takes up 2/3 space) */}
+                <div className="lg:col-span-2 space-y-6">
+                    <HeroCard />
+                    <QuickStats />
+                    <QuickActions />
+
+                </div>
+
+                {/* Right Column (Takes up 1/3 space) */}
+                <div className="lg:col-span-1">
+                    <RightSidebarWidgets />
+                </div>
+                <div className="lg:col-span-3">
                     <RecentTransactions />
                 </div>
-                <div className="lg:col-span-1">
-                    <PromoCard />
-                </div>
+
             </div>
-        </DashboardLayout>
+        </div>
     );
 }

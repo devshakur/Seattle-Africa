@@ -1,4 +1,4 @@
-import { DashboardPage } from "@/features/Dashbaord/page";
+import DashboardPage from "@/features/Dashbaord/page/index";
 
 
 export default function Dashboard() {
