@@ -1,7 +1,8 @@
 import { useState } from "react";
 
 export type PaymentMethod = "card" | "bank" | "mobile";
-export type FlowStep = "select" | "transfer-details" | "payment-details" | "processing" | "result";
+// Added "review" to the flow steps
+export type FlowStep = "select" | "transfer-details" | "review" | "payment-details" | "processing" | "result";
 export type FlowStatus = "success" | "failed" | null;
 
 export function useSendMoneyFlow() {
@@ -9,8 +10,9 @@ export function useSendMoneyFlow() {
     const [method, setMethod] = useState<PaymentMethod>("bank");
     const [status, setStatus] = useState<FlowStatus>(null);
 
-    // New Transfer State
+    // Transfer State
     const [amount, setAmount] = useState("");
+    const [sendCurrency, setSendCurrency] = useState("USD");
     const [country, setCountry] = useState("");
     const [accountNumber, setAccountNumber] = useState("");
     const [accountName, setAccountName] = useState("");
@@ -18,7 +20,8 @@ export function useSendMoneyFlow() {
 
     const nextStep = () => {
         if (step === "select") setStep("transfer-details");
-        else if (step === "transfer-details") setStep("payment-details");
+        else if (step === "transfer-details") setStep("review");
+        else if (step === "review") setStep("payment-details");
         else if (step === "payment-details") {
             setStep("processing");
             setTimeout(() => {
@@ -31,13 +34,15 @@ export function useSendMoneyFlow() {
 
     const prevStep = () => {
         if (step === "transfer-details") setStep("select");
-        else if (step === "payment-details") setStep("transfer-details");
+        else if (step === "review") setStep("transfer-details");
+        else if (step === "payment-details") setStep("review");
     };
 
     const resetFlow = () => {
         setStep("select");
         setStatus(null);
         setAmount("");
+        setSendCurrency("USD");
         setCountry("");
         setAccountNumber("");
         setAccountName("");
@@ -52,8 +57,8 @@ export function useSendMoneyFlow() {
         nextStep,
         prevStep,
         resetFlow,
-        // Transfer details
         amount, setAmount,
+        sendCurrency, setSendCurrency,
         country, setCountry,
         accountNumber, setAccountNumber,
         accountName, setAccountName,

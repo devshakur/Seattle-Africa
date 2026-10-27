@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
     LayoutDashboard,
     Send,
@@ -15,17 +16,18 @@ import {
 import { cn } from "@/libs/utils";
 
 const navItems = [
-    { name: "Dashboard", icon: LayoutDashboard, active: true },
-    { name: "Send Money", icon: Send },
-    { name: "Receive Money", icon: Download },
-    { name: "Transactions", icon: ArrowLeftRight },
-    { name: "Accounts", icon: Wallet },
-    { name: "Settings", icon: Settings },
+    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Send Money", href: "/send-money", icon: Send },
+    { name: "Transactions", href: "/transactions", icon: ArrowLeftRight },
+    { name: "Track Transactions", href: "/track-transaction", icon: Download },
+    { name: "Settings", href: "/settings", icon: Settings },
 ];
 
 export function Sidebar() {
+    const pathname = usePathname();
+
     return (
-        <aside className="w-[260px] h-screen bg-white border-r border-gray-100 flex flex-col fixed left-0 top-0 overflow-y-auto hidden lg:flex">
+        <aside className="w-[260px] h-screen bg-white border-r border-gray-100 flex flex-col fixed left-0 top-0 overflow-y-auto hidden lg:flex z-20">
             {/* Logo */}
             <div className="h-20 flex items-center px-6 mb-2">
                 <Link href="/" className="flex items-center gap-2">
@@ -56,26 +58,29 @@ export function Sidebar() {
 
             {/* Navigation Links */}
             <nav className="flex-1 px-4 space-y-1">
-                {navItems.map((item) => (
-                    <Link
-                        key={item.name}
-                        href="#"
-                        className={cn(
-                            "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
-                            item.active
-                                ? "bg-gray-100 text-gray-900"
-                                : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
-                        )}
-                    >
-                        <item.icon size={18} className={item.active ? "text-gray-900" : "text-gray-400"} />
-                        {item.name}
-                    </Link>
-                ))}
+                {navItems.map((item) => {
+                    const isActive = pathname.startsWith(item.href);
+                    return (
+                        <Link
+                            key={item.name}
+                            href={item.href}
+                            className={cn(
+                                "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
+                                isActive
+                                    ? "bg-gray-100 text-gray-900"
+                                    : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
+                            )}
+                        >
+                            <item.icon size={18} className={isActive ? "text-gray-900" : "text-gray-400"} />
+                            {item.name}
+                        </Link>
+                    );
+                })}
             </nav>
 
             {/* Footer Links */}
             <div className="p-4 mt-auto space-y-1 mb-2">
-                <Link href="#" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors">
+                <Link href="/help" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors">
                     <HelpCircle size={18} className="text-gray-400" />
                     Help & Support
                 </Link>
