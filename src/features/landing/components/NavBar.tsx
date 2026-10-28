@@ -1,38 +1,82 @@
-import { Container } from "@/components/ui/Container";
-import { Button } from "@/components/ui/Button";
 import Link from "next/link";
+import { ArrowRight, Menu } from "lucide-react";
+import { BrandMark } from "./BrandMark";
 
-export function Navbar() {
-    return (
-        <nav className="w-full py-5 border-b border-gray-100/50 backdrop-blur-sm fixed top-0 z-50 bg-white/80">
-            <Container className="flex items-center justify-between">
-                {/* Logo */}
-                <div className="flex items-center gap-2">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M4 16L12 20L20 16V8L12 4L4 8V16Z" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        <path d="M12 20V12" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        <path d="M4 8L12 12L20 8" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    <span className="text-xl font-bold tracking-tight text-gray-900">Settle Africa</span>
-                </div>
+export function NavBar() {
+  return (
+    <header className="site-header sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100">
+      <div className="container nav-wrap flex items-center justify-between h-[76px]">
+        <BrandMark />
 
-                {/* Desktop Nav Links */}
-                <div className="hidden md:flex items-center gap-8">
-                    {['Personal', 'Business', 'Developers', 'About'].map((item) => (
-                        <Link key={item} href="#" className="text-sm font-medium text-gray-500 hover:text-black transition-colors">
-                            {item}
-                        </Link>
-                    ))}
-                </div>
-
-                {/* Auth Buttons */}
-                <div className="flex items-center gap-4">
-                    <Link href="/login" className="hidden sm:block text-sm font-medium text-gray-900 hover:text-gray-600">
-                        Log in
-                    </Link>
-                    <Button className="rounded-lg px-5 h-9 text-sm font-medium">Get started</Button>
-                </div>
-            </Container>
+        <nav className="desktop-nav hidden md:flex items-center gap-8 ml-8" aria-label="Main navigation">
+          <Link
+            href="#send-money"
+            className="text-[15px] font-semibold text-gray-800 hover:text-black transition-colors"
+          >
+            Send money
+          </Link>
+          <Link
+            href="#rates"
+            className="text-[15px] font-semibold text-gray-800 hover:text-black transition-colors"
+          >
+            Rates
+          </Link>
+          <Link
+            href="#support"
+            className="text-[15px] font-semibold text-gray-800 hover:text-black transition-colors"
+          >
+            Support
+          </Link>
+          <Link
+            href="#about"
+            className="text-[15px] font-semibold text-gray-800 hover:text-black transition-colors"
+          >
+            About
+          </Link>
         </nav>
-    );
+
+        <div className="nav-actions flex items-center gap-5">
+          <Link
+            href="/login"
+            className="login-link text-[15px] font-semibold text-gray-900 hover:text-black transition-colors"
+          >
+            Log in
+          </Link>
+          <Link
+            href="/signup"
+            className="button button-dark button-small rounded-full px-5 py-2.5 bg-black text-white text-[13px] font-bold inline-flex items-center gap-2 hover:bg-gray-800 transition-colors"
+          >
+            Get started <ArrowRight size={15} />
+          </Link>
+        </div>
+
+        <details className="mobile-menu md:hidden">
+          <summary aria-label="Open navigation" className="cursor-pointer p-2">
+            <Menu size={24} />
+          </summary>
+          <nav className="absolute right-4 top-16 bg-white border border-gray-200 rounded-2xl p-4 shadow-xl flex flex-col gap-3 min-w-[200px] z-50">
+            <Link href="#send-money" className="text-base font-semibold text-gray-900 py-1">
+              Send money
+            </Link>
+            <Link href="#rates" className="text-base font-semibold text-gray-900 py-1">
+              Rates
+            </Link>
+            <Link href="#support" className="text-base font-semibold text-gray-900 py-1">
+              Support
+            </Link>
+            <Link href="#about" className="text-base font-semibold text-gray-900 py-1">
+              About
+            </Link>
+            <hr className="border-gray-100 my-1" />
+            <Link href="/login" className="text-base font-semibold text-gray-900 py-1">
+              Log in
+            </Link>
+            <Link href="/signup" className="text-base font-bold text-black py-1">
+              Sign up
+            </Link>
+          </nav>
+        </details>
+      </div>
+    </header>
+  );
 }

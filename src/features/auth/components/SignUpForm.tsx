@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image"
 import { Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -29,9 +30,9 @@ export function SignupForm() {
         <main className="relative flex min-h-dvh w-full items-center justify-center overflow-hidden px-3 py-4 sm:px-5">
             <div className="relative flex w-full flex-col items-center justify-center rounded-3xl bg-[#F7F8FA] px-4 py-5 sm:px-6">
 
-                {/* Animated blue bubble */}
+                {/* Animated black bubble */}
                 <div
-                    className="pointer-events-none absolute -right-20 top-[-65px] z-0 h-[200px] w-[200px] animate-bubble-enter rounded-full border border-indigo-300/40 bg-indigo-400/20 shadow-[inset_-12px_-12px_30px_rgba(99,102,241,0.12),inset_10px_10px_24px_rgba(255,255,255,0.45),0_20px_60px_rgba(99,102,241,0.12)]"
+                    className="pointer-events-none absolute -right-20 top-[-65px] z-0 h-[200px] w-[200px] animate-bubble-enter rounded-full border border-black/15 bg-black/10 shadow-[inset_-12px_-12px_30px_rgba(0,0,0,0.15),inset_10px_10px_24px_rgba(255,255,255,0.4),0_20px_60px_rgba(0,0,0,0.12)]"
                     aria-hidden="true"
                 />
 
@@ -43,9 +44,14 @@ export function SignupForm() {
                         aria-label="Settle Africa home"
                         className="mb-3 flex items-center justify-center gap-2"
                     >
-                        <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-black text-white shadow-sm">
-                            <span className="text-base font-bold">S</span>
-                        </span>
+                        <Image
+                            src="/images/settle-logo.png"
+                            alt="Settle Africa logo"
+                            width={62}
+                            height={62}
+                            priority
+                            className="object-contain"
+                        />
 
                         <span className="text-base font-bold tracking-tight text-gray-950">
                             Settle{" "}

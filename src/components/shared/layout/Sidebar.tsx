@@ -1,6 +1,8 @@
 "use client";
 
-import Link from "next/link";
+import Link from "next/link"
+import Image from "next/image";
+
 import { usePathname } from "next/navigation";
 import {
     LayoutDashboard,
@@ -56,12 +58,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 {/* Logo & Mobile Close Button */}
                 <div className="h-20 flex items-center justify-between px-6 mb-2">
                     <Link href="/" className="flex items-center gap-2" onClick={onClose}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M4 16L12 20L20 16V8L12 4L4 8V16Z" stroke="black" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                            <path d="M12 20V12" stroke="black" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                            <path d="M4 8L12 12L20 8" stroke="black" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                        <span className="text-lg font-bold tracking-tight text-gray-900">Settle Africa</span>
+                        <Image src="/images/settle-logo.png" alt="Settle Africa logo" width={45} height={45} priority className="object-contain" />
+                        <span className="text-lg font-bold tracking-tight text-gray-900">Seattle Africa</span>
                     </Link>
 
                     {/* Close button visible only on mobile */}

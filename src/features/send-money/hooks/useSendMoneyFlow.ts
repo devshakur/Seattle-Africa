@@ -1,12 +1,13 @@
 import { useState } from "react";
 
 export type PaymentMethod = "card" | "bank" | "mobile";
-// Added "review" to the flow steps
-export type FlowStep = "select" | "transfer-details" | "review" | "payment-details" | "processing" | "result";
+
+// Flow order: transfer-details -> review -> select payment method -> payment-details -> processing -> result
+export type FlowStep = "transfer-details" | "review" | "select" | "payment-details" | "processing" | "result";
 export type FlowStatus = "success" | "failed" | null;
 
 export function useSendMoneyFlow() {
-    const [step, setStep] = useState<FlowStep>("select");
+    const [step, setStep] = useState<FlowStep>("transfer-details");
     const [method, setMethod] = useState<PaymentMethod>("bank");
     const [status, setStatus] = useState<FlowStatus>(null);
 
@@ -19,9 +20,9 @@ export function useSendMoneyFlow() {
     const [bankName, setBankName] = useState("");
 
     const nextStep = () => {
-        if (step === "select") setStep("transfer-details");
-        else if (step === "transfer-details") setStep("review");
-        else if (step === "review") setStep("payment-details");
+        if (step === "transfer-details") setStep("review");
+        else if (step === "review") setStep("select");
+        else if (step === "select") setStep("payment-details");
         else if (step === "payment-details") {
             setStep("processing");
             setTimeout(() => {
@@ -33,13 +34,13 @@ export function useSendMoneyFlow() {
     };
 
     const prevStep = () => {
-        if (step === "transfer-details") setStep("select");
-        else if (step === "review") setStep("transfer-details");
-        else if (step === "payment-details") setStep("review");
+        if (step === "review") setStep("transfer-details");
+        else if (step === "select") setStep("review");
+        else if (step === "payment-details") setStep("select");
     };
 
     const resetFlow = () => {
-        setStep("select");
+        setStep("transfer-details");
         setStatus(null);
         setAmount("");
         setSendCurrency("USD");
