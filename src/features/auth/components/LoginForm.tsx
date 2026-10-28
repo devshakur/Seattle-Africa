@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image"
 import { Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { AccountTypeToggle } from "./AccountTypeToggle";
-import { SocialAuth } from "./SocialAuth";
+
 
 export function LoginForm() {
     const [accountType, setAccountType] = useState<
@@ -25,9 +26,9 @@ export function LoginForm() {
             <div className="w-full flex flex-col items-center justify-center bg-[#F7F8FA] py-3 rounded-3xl px-3">
                 {/* Big Soft Bubbles stuck at the right edge */}
 
-                {/* Animated blue bubble — enters and settles at top-right */}
+                {/* Animated black bubble — enters and settles at top-right */}
                 <div
-                    className="pointer-events-none absolute -right-25 top-40 lg:top-35 xl:top-9 2xl:top-6 z-0 h-[200px] w-[200px] animate-bubble-enter rounded-full border border-indigo-300/40 bg-indigo-400/20 shadow-[inset_-12px_-12px_30px_rgba(99,102,241,0.12),inset_10px_10px_24px_rgba(255,255,255,0.45),0_20px_60px_rgba(99,102,241,0.12)]"
+                    className="pointer-events-none absolute -right-25 top-40 lg:top-35 xl:top-9 2xl:top-6 z-0 h-[200px] w-[200px] animate-bubble-enter rounded-full border border-black/15 bg-black/10 shadow-[inset_-12px_-12px_30px_rgba(0,0,0,0.15),inset_10px_10px_24px_rgba(255,255,255,0.4),0_20px_60px_rgba(0,0,0,0.12)]"
                     aria-hidden="true"
                 />
 
@@ -35,24 +36,29 @@ export function LoginForm() {
                 {/* Container with maintained width */}
                 <div className="relative z-10 w-full max-w-[420px] flex flex-col items-center">
 
-                    {/* Brand */}
-                    <Link
-                        href="/"
-                        className="mb-3 flex items-center justify-center gap-2"
-                        aria-label="Settle Africa home"
-                    >
-                        <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-black text-white shadow-sm">
-                            <span className="text-base font-bold">S</span>
-                        </span>
 
-                        <span className="text-base font-bold tracking-tight text-gray-950">
-                            Settle <span className="font-normal text-gray-600">Africa</span>
-                        </span>
-                    </Link>
 
                     {/* Login Card */}
                     <section className="relative w-full overflow-hidden rounded-2xl border border-gray-200/80 bg-white/95 backdrop-blur-md px-6 py-5 shadow-[0_10px_35px_rgba(15,23,42,0.05)] sm:px-8 sm:py-6">
+                        {/* Brand */}
+                        <Link
+                            href="/"
+                            className="mb-3 flex items-center justify-center gap-2"
+                            aria-label="Settle Africa home"
+                        >
+                            <Image
+                                src="/images/settle-logo.png"
+                                alt="Settle Africa logo"
+                                width={62}
+                                height={62}
+                                priority
+                                className="object-contain"
+                            />
 
+                            <span className="text-base font-bold tracking-tight text-gray-950">
+                                Settle <span className="font-normal text-gray-600">Africa</span>
+                            </span>
+                        </Link>
                         {/* Heading */}
                         <div className="mb-4">
                             <h1 className="text-xl font-semibold tracking-tight text-gray-950">

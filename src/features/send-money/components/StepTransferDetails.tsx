@@ -361,7 +361,7 @@ export function StepTransferDetails({
                                 disabled={!isFormValid}
                                 className="h-11 rounded-xl px-6 text-sm font-semibold bg-black text-white hover:bg-gray-800 disabled:bg-gray-200 disabled:text-gray-400 transition-all shadow-sm"
                             >
-                                Continue to Payment
+                                Review Transfer
                                 <ArrowRight size={16} className="ml-1.5" />
                             </Button>
                         </div>

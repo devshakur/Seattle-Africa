@@ -2,9 +2,9 @@
 
 import { useSendMoneyFlow } from "../hooks/useSendMoneyFlow";
 import { FlowLayout } from "../components/FlowLayout";
-import { StepSelectMethod } from "../components/StepSelectMethod";
 import { StepTransferDetails } from "../components/StepTransferDetails";
 import { StepReviewTransfer } from "../components/StepReviewTransfer";
+import { StepSelectMethod } from "../components/StepSelectMethod";
 import { StepPaymentDetails } from "../components/StepPaymentDetails";
 import { StepProcessing } from "../components/StepProcessing";
 import { StepResult } from "../components/StepResult";
@@ -12,25 +12,17 @@ import { StepResult } from "../components/StepResult";
 export function SendMoneyFlow() {
     const flow = useSendMoneyFlow();
 
-    // Determine progress dot index
+    // Determine progress index:
+    // 0: Transfer details, 1: Review transfer, 2: Select method, 3: Payment details
     const stepIndex =
-        flow.step === "select" ? 0 :
-            flow.step === "transfer-details" ? 1 :
-                flow.step === "review" ? 1 :
-                    flow.step === "payment-details" ? 2 :
-                        2;
+        flow.step === "transfer-details" ? 0 :
+            flow.step === "review" ? 1 :
+                flow.step === "select" ? 2 :
+                    flow.step === "payment-details" ? 3 :
+                        3;
 
     return (
         <FlowLayout stepIndex={stepIndex}>
-            {flow.step === "select" && (
-                <StepSelectMethod
-                    selected={flow.method}
-                    onSelect={flow.setMethod}
-                    onNext={flow.nextStep}
-                    onBack={() => window.history.back()}
-                />
-            )}
-
             {flow.step === "transfer-details" && (
                 <StepTransferDetails
                     amount={flow.amount}
@@ -46,7 +38,7 @@ export function SendMoneyFlow() {
                     bankName={flow.bankName}
                     setBankName={flow.setBankName}
                     onNext={flow.nextStep}
-                    onBack={flow.prevStep}
+                    onBack={() => window.history.back()}
                 />
             )}
 
@@ -63,16 +55,28 @@ export function SendMoneyFlow() {
                 />
             )}
 
+            {flow.step === "select" && (
+                <StepSelectMethod
+                    selected={flow.method}
+                    onSelect={flow.setMethod}
+                    onNext={flow.nextStep}
+                    onBack={flow.prevStep}
+                    amount={flow.amount}
+                    sendCurrency={flow.sendCurrency}
+                    accountName={flow.accountName}
+                />
+            )}
+
             {flow.step === "payment-details" && (
                 <StepPaymentDetails
                     method={flow.method}
                     amount={flow.amount}
                     sendCurrency={flow.sendCurrency}
                     fee="2.00"
-                    total={(parseFloat(flow.amount) + 2).toFixed(2)}
+                    total={(parseFloat(flow.amount || "0") + 2).toFixed(2)}
                     accountName={flow.accountName}
                     bankName={flow.bankName}
-                    country={flow.country} // <-- FIXED: Added missing country prop here
+                    country={flow.country}
                     onNext={flow.nextStep}
                     onBack={flow.prevStep}
                 />

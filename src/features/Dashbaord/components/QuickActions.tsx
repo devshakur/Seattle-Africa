@@ -17,7 +17,7 @@ export function QuickActions() {
                 {actions.map((action) => (
                     <Link key={action.title} href={action.href}>
                         <Card className="p-4 hover:border-gray-400 hover:shadow-md transition-all group cursor-pointer h-full">
-                            <div className="w-10 h-10 rounded-xl bg-black flex items-center justify-center mb-3 group-hover:bg-black group-hover:text-white transition-colors">
+                            <div className="w-10 h-10 rounded-xl bg-black flex items-center justify-center mb-3 group-hover:bg-black text-white transition-colors">
                                 <action.icon size={18} />
                             </div>
                             <h3 className="text-sm font-semibold text-gray-900 mb-1">{action.title}</h3>

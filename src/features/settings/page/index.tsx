@@ -3,6 +3,7 @@
 import { useSettings } from "../hooks/useSettings";
 import { SettingsSidebar } from "../components/SettingsSidebar";
 import { ProfileSettings } from "../components/ProfileSettings";
+import { AccountSettings } from "../components/AccountSettings";
 import { SecuritySettings } from "../components/SecuritySettings";
 import { NotificationSettings } from "../components/NotificationSettings";
 
@@ -32,6 +33,12 @@ export function SettingsPage() {
                         <ProfileSettings
                             isSaving={settings.isSaving}
                             onSave={settings.handleSave}
+                        />
+                    )}
+                    {settings.activeTab === "account" && (
+                        <AccountSettings
+                            accountType={settings.accountType}
+                            onSwitch={settings.setAccountType}
                         />
                     )}
                     {settings.activeTab === "security" && <SecuritySettings />}

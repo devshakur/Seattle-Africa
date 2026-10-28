@@ -1,17 +1,19 @@
+"use client";
+
 import { useState } from "react";
 
-export type SettingsTab = "profile" | "security" | "notifications";
+export type SettingsTab = "profile" | "account" | "security" | "notifications";
+export type AccountType = "personal" | "business";
 
 export function useSettings() {
     const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
     const [isSaving, setIsSaving] = useState(false);
+    const [accountType, setAccountType] = useState<AccountType>("personal");
 
     const handleSave = () => {
         setIsSaving(true);
-        // Simulate API call
         setTimeout(() => {
             setIsSaving(false);
-            // You could add a toast notification here
         }, 1500);
     };
 
@@ -20,5 +22,7 @@ export function useSettings() {
         setActiveTab,
         isSaving,
         handleSave,
+        accountType,
+        setAccountType,
     };
 }

@@ -1,4 +1,4 @@
-import { User, Shield, Bell } from "lucide-react";
+import { User, Building2, Shield, Bell } from "lucide-react";
 import { SettingsTab } from "../hooks/useSettings";
 import { cn } from "@/libs/utils";
 
@@ -9,6 +9,7 @@ interface Props {
 
 const tabs = [
     { id: "profile" as SettingsTab, label: "Profile", icon: User },
+    { id: "account" as SettingsTab, label: "Account", icon: Building2 },
     { id: "security" as SettingsTab, label: "Security", icon: Shield },
     { id: "notifications" as SettingsTab, label: "Notifications", icon: Bell },
 ];

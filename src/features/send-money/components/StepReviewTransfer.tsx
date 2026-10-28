@@ -170,7 +170,7 @@ export function StepReviewTransfer({
                                 onClick={onNext}
                                 className="h-11 rounded-xl px-6 text-sm font-semibold bg-black text-white hover:bg-gray-800 transition-all shadow-sm"
                             >
-                                Confirm & Proceed to Payment
+                                Choose Payment Method
                                 <ArrowRight size={16} className="ml-1.5" />
                             </Button>
                         </div>
