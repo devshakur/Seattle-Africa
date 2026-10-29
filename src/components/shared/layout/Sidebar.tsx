@@ -59,7 +59,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 <div className="h-20 flex items-center justify-between px-6 mb-2">
                     <Link href="/" className="flex items-center gap-2" onClick={onClose}>
                         <Image src="/images/settle-logo.png" alt="Settle Africa logo" width={45} height={45} priority className="object-contain" />
-                        <span className="text-lg font-bold tracking-tight text-gray-900">Seattle Africa</span>
+                        <span className="text-lg font-bold tracking-tight text-gray-900">Settle Africa</span>
                     </Link>
 
                     {/* Close button visible only on mobile */}
@@ -76,7 +76,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                                 <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Amina" alt="User" className="w-full h-full object-cover" />
                             </div>
                             <div>
-                                <p className="text-sm font-semibold text-gray-900">Amina Yusuf</p>
+                                <p className="text-sm font-semibold text-gray-900">Abdulshakur Dauda</p>
                                 <p className="text-xs text-gray-500">Personal Account</p>
                             </div>
                         </div>
