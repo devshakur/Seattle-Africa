@@ -4,14 +4,14 @@ import { Card } from "@/components/ui/Card";
 const stats = [
     {
         title: "Total Sent",
-        amount: "$8,450.00",
+        amount: "$0.00",
         trend: "+ 18%",
         trendUp: true,
         icon: ArrowUpRight,
     },
     {
         title: "Total Received",
-        amount: "$4,030.00",
+        amount: "$0.00",
         trend: "- 2%",
         trendUp: false,
         icon: ArrowDownRight,
@@ -42,7 +42,7 @@ export function QuickStats() {
                     </div>
                     <div>
                         <p className="text-sm font-medium text-gray-500 mb-1">{stat.title}</p>
-                        <h3 className="text-2xl font-bold text-gray-900">{stat.amount}</h3>
+                        <h3 className="text-lg font-semibold text-gray-900">{stat.amount}</h3>
                         {stat.subtitle && <p className="text-xs text-gray-400 mt-1">{stat.subtitle}</p>}
                     </div>
                 </Card>

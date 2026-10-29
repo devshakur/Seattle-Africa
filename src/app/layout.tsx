@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Seattle Africa — Send Money Across Africa",
-  description: "Seattle Africa helps you send money across supported African markets with clear rates and upfront fees.",
+  title: "Settle Africa — Send Money Across Africa",
+  description: "Settle Africa helps you send money across supported African markets with clear rates and upfront fees.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

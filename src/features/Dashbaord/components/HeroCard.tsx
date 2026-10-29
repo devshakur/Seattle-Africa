@@ -11,10 +11,10 @@ export function HeroCard() {
                     <p className="text-gray-400 text-sm mb-1 flex items-center gap-1">
                         Total Volume Transferred
                     </p>
-                    <h2 className="text-4xl sm:text-5xl font-bold tracking-tight mb-3">$12,480.00</h2>
+                    <h2 className=" text-3xl sm:text-2xl font-bold tracking-tight mb-3">$0.00</h2>
                     <div className="flex items-center gap-1 text-sm font-medium text-gray-300">
                         <ArrowUpRight size={16} className="text-white" />
-                        <span className="text-white">+12.5%</span> vs last month
+                        <span className="text-white">+0.27%</span> vs last month
                     </div>
                 </div>
 
@@ -27,8 +27,8 @@ export function HeroCard() {
                         { label: "New", icon: Plus },
                     ].map((action) => (
                         <button key={action.label} className="flex flex-col items-center justify-center gap-2 group">
-                            <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-all border border-white/5">
-                                <action.icon size={20} className="text-white" />
+                            <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-all border border-white/5">
+                                <action.icon size={16} className="text-white" />
                             </div>
                             <span className="text-xs font-medium text-gray-400 group-hover:text-white transition-colors">{action.label}</span>
                         </button>
