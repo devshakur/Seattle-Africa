@@ -68,7 +68,7 @@ export function Footer() {
 
         {/* Bottom: Copyright & Legal Disclaimer */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 pt-8 text-xs sm:text-sm font-semibold text-gray-600">
-          <span>© {new Date().getFullYear()} Seattle Africa. All rights reserved.</span>
+          <span>© 2026 Settle Africa. All rights reserved.</span>
           <span className="max-w-xl text-gray-500">
             Transfer availability, fees and delivery times depend on the supported route.
           </span>

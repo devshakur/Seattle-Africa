@@ -29,7 +29,7 @@ export function BenefitsSection() {
       <div className="container">
         <div className="section-heading text-center max-w-2xl mx-auto mb-14">
           <p className="eyebrow text-xs sm:text-sm font-extrabold tracking-widest text-gray-600 uppercase mb-3">
-            Why choose Seattle Africa
+            Why choose Settle Africa
           </p>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-gray-950 mb-4">
             More than just a transfer

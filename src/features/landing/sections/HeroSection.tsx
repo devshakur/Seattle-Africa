@@ -15,7 +15,7 @@ export function HeroSection() {
             Send money<br className="desktop-break" /> across Africa,<br className="desktop-break" /> with ease.
           </h1>
           <p className="hero-description text-base sm:text-lg lg:text-[19px] text-gray-700 leading-relaxed max-w-xl mb-8 font-medium">
-            <strong className="text-gray-950 font-bold">Seattle Africa</strong> helps you send money across supported African markets. Review the conversion, understand the fees and know what your recipient should receive before you confirm.
+            <strong className="text-gray-950 font-bold">Settle Africa</strong> helps you send money across supported African markets. Review the conversion, understand the fees and know what your recipient should receive before you confirm.
           </p>
           <div className="hero-actions flex items-center gap-4 flex-wrap">
             <Link href="/send-money" className="button button-dark rounded-full px-7 py-3.5 bg-black text-white text-sm sm:text-base font-bold inline-flex items-center gap-2.5 shadow-md hover:bg-gray-800 transition-transform hover:-translate-y-0.5">
