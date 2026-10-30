@@ -1,78 +1,100 @@
 import Link from "next/link";
-import { CircleDollarSign, Globe2, LockKeyhole, ShieldCheck } from "lucide-react";
+import {
+  ArrowUpRight,
+  Globe2,
+  LockKeyhole,
+  ShieldCheck,
+  CircleDollarSign,
+} from "lucide-react";
 import { BrandMark } from "./BrandMark";
 
-export const trustItems = [
-  { icon: LockKeyhole, text: "Security-first experience" },
-  { icon: ShieldCheck, text: "Transparent transfer details" },
-  { icon: CircleDollarSign, text: "Fees shown upfront" },
-  { icon: Globe2, text: "Built for cross-border payments" },
+const footerLinks = [
+  {
+    title: "Explore",
+    links: [
+      { label: "About us", href: "#about" },
+      { label: "How it works", href: "#how-it-works" },
+      { label: "Exchange rates", href: "#rates" },
+    ],
+  },
+  {
+    title: "Services",
+    links: [
+      { label: "Send money", href: "#send-money" },
+      { label: "Track transfer", href: "#track" },
+      { label: "Supported countries", href: "#countries" },
+    ],
+  },
+  {
+    title: "Support",
+    links: [
+      { label: "Help center", href: "#support" },
+      { label: "Contact us", href: "mailto:support@settleafrica.com" },
+      { label: "FAQs", href: "#faq" },
+    ],
+  },
+];
+
+const trustItems = [
+  { icon: LockKeyhole, label: "Security focused" },
+  { icon: ShieldCheck, label: "Transparent transfers" },
+  { icon: CircleDollarSign, label: "Upfront fees" },
+  { icon: Globe2, label: "Cross-border payments" },
 ];
 
 export function Footer() {
   return (
-    <footer className="footer bg-gray-50/70 border-t border-gray-200/80 pt-14 pb-10" id="support">
+    <footer
+      id="support"
+      className="bg-gray-50 border-t border-gray-200"
+    >
       <div className="container">
-        {/* Top: Brand, Tagline, Navigation */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-10 border-b border-gray-200">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8">
+
+        {/* Main footer */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr] gap-12 lg:gap-16 py-14 lg:py-16">
+
+          {/* Brand */}
+          <div className="max-w-sm">
             <BrandMark />
-            <p className="text-sm sm:text-base font-semibold text-gray-700">
-              Money moves better when everything is clear.
+
+            <p className="mt-5 text-sm leading-7 text-gray-500">
+              Moving money across borders, made simpler.
+              Experience a clearer, more convenient way to
+              send and receive money with Settle Africa.
             </p>
-          </div>
-          <nav className="flex items-center gap-6 sm:gap-8 flex-wrap">
-            <Link
-              href="#about"
-              className="text-sm sm:text-base font-bold text-gray-900 hover:text-black transition-colors"
-            >
-              About
-            </Link>
-            <Link
-              href="#rates"
-              className="text-sm sm:text-base font-bold text-gray-900 hover:text-black transition-colors"
-            >
-              Rates
-            </Link>
+
             <Link
               href="#how-it-works"
-              className="text-sm sm:text-base font-bold text-gray-900 hover:text-black transition-colors"
+              className="inline-flex items-center gap-2 mt-5 text-sm font-semibold text-gray-950 hover:gap-3 transition-all"
             >
-              How it works
+              Discover Settle Africa
+              <ArrowUpRight size={16} />
             </Link>
-            <Link
-              href="mailto:support@seattleafrica.example"
-              className="text-sm sm:text-base font-bold text-gray-900 hover:text-black transition-colors"
-            >
-              Support
-            </Link>
-          </nav>
-        </div>
+          </div>
 
-        {/* Security / Trust Row: Larger, bolder and clearly visible */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 py-9 border-b border-gray-200">
-          {trustItems.map(({ icon: Icon, text }) => (
-            <div
-              key={text}
-              className="flex items-center gap-3.5 bg-white/80 border border-gray-200/90 rounded-xl px-4 py-3 shadow-xs"
-            >
-              <div className="w-9 h-9 rounded-lg bg-black text-white flex items-center justify-center shrink-0">
-                <Icon size={19} strokeWidth={2.4} />
-              </div>
-              <span className="text-sm sm:text-[15px] font-bold text-gray-950">
-                {text}
-              </span>
+          {/* Navigation */}
+          {footerLinks.map((group) => (
+            <div key={group.title}>
+              <h3 className="text-sm font-bold text-gray-950 mb-5">
+                {group.title}
+              </h3>
+
+              <ul className="space-y-4">
+                {group.links.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-gray-500 hover:text-gray-950 transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
           ))}
         </div>
 
-        {/* Bottom: Copyright & Legal Disclaimer */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 pt-8 text-xs sm:text-sm font-semibold text-gray-600">
-          <span>© 2026 Settle Africa. All rights reserved.</span>
-          <span className="max-w-xl text-gray-500">
-            Transfer availability, fees and delivery times depend on the supported route.
-          </span>
-        </div>
       </div>
     </footer>
   );
