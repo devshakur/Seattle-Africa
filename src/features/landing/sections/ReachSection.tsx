@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import Image from "next/image";
 
 export function ReachSection() {
   return (
@@ -21,37 +22,19 @@ export function ReachSection() {
         </div>
 
         <div className="africa-art" aria-label="Stylised map of Africa">
-          <svg viewBox="0 0 280 300" role="img" aria-label="Abstract connected routes across Africa">
-            <defs>
-              <linearGradient id="africaFill" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#f0f0f0" />
-                <stop offset="100%" stopColor="#bdbdbd" />
-              </linearGradient>
-            </defs>
-            <path
-              d="M78 20 116 28 139 18 165 42 184 54 174 82 192 105 175 131 164 162 146 188 137 224 118 264 103 244 92 206 76 178 64 150 48 127 39 94 52 68 48 44Z"
-              fill="url(#africaFill)"
-              stroke="#d0d0d0"
-              strokeWidth="1.5"
+          <div className="africa-art mb-4" aria-label="Map of Africa">
+            <Image
+              src="/images/africa-map.svg"
+              alt="Map of Africa"
+              width={280}
+              height={300}
+              priority
             />
-            <path
-              d="M52 68 118 93 174 82M39 94 92 124 192 105M48 127 115 152 164 162M64 150 103 184 146 188M76 178 118 206 137 224M116 28 115 93 115 152 118 206"
-              fill="none"
-              stroke="#fff"
-              strokeWidth="2"
-            />
-            <path
-              d="M62 112 Q103 83 145 130 T174 82M92 190 Q130 165 164 162"
-              fill="none"
-              stroke="#858585"
-              strokeWidth="1.5"
-              strokeDasharray="4 5"
-            />
-            <circle cx="115" cy="93" r="5" fill="#111" />
-            <circle cx="145" cy="130" r="5" fill="#111" />
-            <circle cx="103" cy="184" r="5" fill="#111" />
-            <circle cx="174" cy="82" r="5" fill="#111" />
-          </svg>
+
+          </div>
+          <span className="mt-4 map-caption font-bold text-xs sm:text-sm">
+            Connected by possibility
+          </span>
           <span className="map-caption font-bold text-xs sm:text-sm">Connected by possibility</span>
         </div>
 

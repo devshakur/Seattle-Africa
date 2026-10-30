@@ -16,7 +16,7 @@ export function SendSection() {
             Review your route, compare the conversion and continue when you&apos;re ready.
           </p>
         </div>
-        <Link href="/send-money" className="button button-light rounded-full px-8 py-4 bg-white text-black text-sm sm:text-base font-bold inline-flex items-center gap-2.5 hover:bg-gray-100 transition-colors shrink-0 shadow-lg">
+        <Link href="/signup" className="button button-light rounded-full px-8 py-4 bg-white text-black text-sm sm:text-base font-bold inline-flex items-center gap-2.5 hover:bg-gray-100 transition-colors shrink-0 shadow-lg">
           Get started <ArrowRight size={18} />
         </Link>
       </div>
