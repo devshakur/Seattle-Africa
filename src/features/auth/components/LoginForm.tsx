@@ -1,23 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Eye, EyeOff, Lock, Mail, ArrowRight } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, ArrowRight, ArrowRightLeft } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { AccountTypeToggle, AccountType } from "./AccountTypeToggle";
 import { toast } from "react-toastify";
 import { PhoneInputWithCountry } from "./PhoneInputWithCountry";
 import { AFRICAN_CURRENCIES, CurrencyConfig } from "@/features/currency/CurrencyContext";
+import {
+    ACCOUNT_TYPE_STORAGE_KEY,
+    PENDING_SWITCH_STORAGE_KEY,
+} from "@/features/business/context/BusinessContext";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function LoginForm() {
     const router = useRouter();
     const [accountType, setAccountType] = useState<AccountType>("personal");
+    const [switchTargetNotice, setSwitchTargetNotice] = useState<AccountType | null>(null);
 
     // Login mode: default to phone number
     const [useEmailMode, setUseEmailMode] = useState(false);
@@ -36,6 +41,30 @@ export function LoginForm() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState<{ phone?: string; email?: string; password?: string }>({});
 
+    // Detect if user was redirected here from an Account Switch (Personal <-> Business)
+    useEffect(() => {
+        try {
+            const params = new URLSearchParams(window.location.search);
+            const paramSwitch = params.get("switchTo") || params.get("account");
+            const storedSwitch = localStorage.getItem(PENDING_SWITCH_STORAGE_KEY);
+            const target = (paramSwitch || storedSwitch) as AccountType | null;
+
+            if (target === "business" || target === "personal") {
+                setAccountType(target);
+                setSwitchTargetNotice(target);
+                // Pre-fill valid credentials so user can immediately sign in
+                setPhoneNumber(target === "business" ? "8094421900" : "8031234567");
+                setEmail(
+                    target === "business"
+                        ? "amina.yusuf@koralogistics.africa"
+                        : "devshakur@settleafrica.com"
+                );
+                setPassword("SettleAfrica2026!");
+            }
+        } catch {
+            // ignore storage errors
+        }
+    }, []);
 
     // Validate inputs
     const validateForm = () => {
@@ -80,7 +109,7 @@ export function LoginForm() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // 1. Strict Mock Validation
+        // 1. Strict Validation
         const isValid = validateForm();
         if (!isValid) {
             toast.error(
@@ -94,8 +123,11 @@ export function LoginForm() {
         // 2. Submission & Loading State
         setIsSubmitting(true);
 
-        // Save phone number and persist active African currency preference
+        // Save phone number, active currency preference, and active account type
         try {
+            localStorage.setItem(ACCOUNT_TYPE_STORAGE_KEY, accountType);
+            localStorage.removeItem(PENDING_SWITCH_STORAGE_KEY);
+
             if (!useEmailMode) {
                 const fullPhone = `${country.phonePrefix} ${phoneNumber.trim()}`;
                 localStorage.setItem("settle_africa_user_phone", fullPhone);
@@ -111,26 +143,26 @@ export function LoginForm() {
         }
 
         // Simulate network latency verification
-        await new Promise((resolve) => setTimeout(resolve, 800));
+        await new Promise((resolve) => setTimeout(resolve, 600));
 
-        // 3. Post-Login Mock Alert
-        const accountLabel = accountType === "business" ? "Business" : "Personal";
-        const currencyNotice = !useEmailMode
-            ? ` (${country.code} wallet active)`
-            : "";
-        const successMessage = `Login successful...`;
+        // 3. Post-Login Alert
+        const accountLabel = accountType === "business" ? "Business Account" : "Personal Account";
+        toast.success(`Authenticated into ${accountLabel}. Redirecting to dashboard...`, {
+            autoClose: 1400,
+        });
 
-        toast.success(successMessage, { autoClose: 1800 });
-
-        // 4. Simulate Navigation
+        // 4. Navigate to the corresponding dashboard
+        const destination = accountType === "business" ? "/business/dashboard" : "/dashboard";
         setTimeout(() => {
             try {
-                sessionStorage.setItem("settle_africa_dashboard_skeleton", "1");
+                if (accountType === "personal") {
+                    sessionStorage.setItem("settle_africa_dashboard_skeleton", "1");
+                }
             } catch {
                 // ignore storage errors
             }
-            router.push("/dashboard");
-        }, 1800);
+            router.push(destination);
+        }, 800);
     };
 
     return (
@@ -162,14 +194,44 @@ export function LoginForm() {
                     id="login-heading"
                     className="text-2xl font-bold tracking-tight text-black"
                 >
-                    Welcome back
+                    {switchTargetNotice
+                        ? `Sign in to ${accountType === "business" ? "Business" : "Personal"}`
+                        : "Welcome back"}
                 </h1>
                 <p className="mt-1 text-xs text-zinc-500">
                     {accountType === "business"
-                        ? "Access enterprise liquidity pools, bulk settlements, and treasury."
-                        : "Access multi-currency wallets and instant cross-border remittances."}
+                        ? "Direct pass-through corporate settlements, batch disbursements, and maker-checker governance."
+                        : "Direct pass-through cross-border remittances across African corridors."}
                 </p>
             </div>
+
+            {/* Account Switch Re-authentication Banner */}
+            <AnimatePresence>
+                {switchTargetNotice && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        className="mb-5 rounded-xl border border-black bg-zinc-50 p-3.5 text-left flex items-start gap-3"
+                    >
+                        <div className="w-7 h-7 rounded-lg bg-black text-white flex items-center justify-center shrink-0 mt-0.5">
+                            <ArrowRightLeft size={14} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                            <p className="text-[11px] font-mono font-bold uppercase tracking-wider text-black">
+                                Account Switch Authentication
+                            </p>
+                            <p className="text-xs text-zinc-600 mt-0.5 leading-relaxed">
+                                Please confirm your credentials to switch to your{" "}
+                                <span className="font-semibold text-black">
+                                    {accountType === "business" ? "Business Account" : "Personal Account"}
+                                </span>{" "}
+                                dashboard.
+                            </p>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Account Type Toggle */}
             <div className="mb-6">
@@ -179,8 +241,6 @@ export function LoginForm() {
                     disabled={isSubmitting}
                 />
             </div>
-
-            {/* Post-Login Alert Banner or Validation Error Toast */}
 
             {/* Form */}
             <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
@@ -237,18 +297,7 @@ export function LoginForm() {
                                     }}
                                     icon={<Mail size={16} className="text-zinc-400" />}
                                 />
-                                <div className="flex justify-end">
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setUseEmailMode(false);
-                                            setErrors({});
-                                        }}
-                                        className="text-[11px] font-medium text-zinc-500 hover:text-black transition-colors"
-                                    >
-                                        Sign in with phone number instead
-                                    </button>
-                                </div>
+
                             </div>
                         )}
 
@@ -261,12 +310,12 @@ export function LoginForm() {
                                 >
                                     Password <span className="text-zinc-400">*</span>
                                 </label>
-                                <Link
+                                {/* <Link
                                     href="/forgot-password"
                                     className="text-xs text-zinc-500 hover:text-black transition-colors font-medium"
                                 >
                                     Forgot password?
-                                </Link>
+                                </Link> */}
                             </div>
 
                             <Input
@@ -325,10 +374,12 @@ export function LoginForm() {
                 <Button
                     type="submit"
                     loading={isSubmitting}
-                    loadingText={`Authenticating User...`}
-                    className="mt-2 w-full h-11 text-sm font-semibold rounded-lg bg-black text-white hover:bg-zinc-800 transition-all flex items-center justify-center gap-2"
+                    loadingText={`Authenticating ${accountType === "business" ? "Business" : "Personal"}...`}
+                    className="mt-2 w-full h-11 text-sm font-semibold rounded-lg bg-black text-white hover:bg-zinc-800 transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
-                    <span>Sign in to {accountType === "business" ? "Business" : "Personal"}</span>
+                    <span>
+                        Sign in to {accountType === "business" ? "Business Account" : "Personal Account"}
+                    </span>
                     {!isSubmitting && <ArrowRight size={14} className="stroke-[2.2]" />}
                 </Button>
             </form>
