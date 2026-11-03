@@ -1,7 +1,8 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { Camera, Loader2, CheckCircle2, User, Trash2 } from "lucide-react";
+import { useRef, useState, useMemo } from "react";
+import { Camera, Loader2, CheckCircle2, ShieldCheck, Trash2, Mail, Phone, MapPin, Globe } from "lucide-react";
+import { toast } from "react-toastify";
 import { Button } from "@/components/ui/Button";
 
 interface Props {
@@ -14,7 +15,24 @@ export function ProfileSettings({ isSaving, onSave }: Props) {
     const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
     const [uploadProgress, setUploadProgress] = useState<number>(0);
     const [isUploading, setIsUploading] = useState(false);
-    const [uploadDone, setUploadDone] = useState(false);
+
+    // Profile field states
+    const [firstName, setFirstName] = useState("Abdulshakur");
+    const [lastName, setLastName] = useState("Dauda");
+    const [email, setEmail] = useState("devshakur@settleafrica.com");
+    const [phone, setPhone] = useState("+234 803 123 4567");
+    const [country, setCountry] = useState("Nigeria");
+    const [city, setCity] = useState("Lagos, Victoria Island");
+    const [bio, setBio] = useState(
+        "Individual account holder at Settle Africa. Managing pan-African remittance and supplier payments."
+    );
+
+    // Extract first initial of first and last name
+    const initials = useMemo(() => {
+        const first = firstName.trim().charAt(0) || "";
+        const last = lastName.trim().charAt(0) || "";
+        return `${first}${last}`.toUpperCase() || "SA";
+    }, [firstName, lastName]);
 
     const handleUploadClick = () => {
         fileInputRef.current?.click();
@@ -24,239 +42,250 @@ export function ProfileSettings({ isSaving, onSave }: Props) {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        // Reset states
         setIsUploading(true);
-        setUploadDone(false);
         setUploadProgress(0);
 
-        // Read file for preview
         const reader = new FileReader();
         reader.onload = (ev) => {
             const src = ev.target?.result as string;
 
-            // Simulate upload progress
             let progress = 0;
             const interval = setInterval(() => {
-                progress += Math.floor(Math.random() * 18) + 8;
+                progress += 25;
                 if (progress >= 100) {
-                    progress = 100;
                     clearInterval(interval);
-                    setUploadProgress(100);
-                    setTimeout(() => {
-                        setAvatarSrc(src);
-                        setIsUploading(false);
-                        setUploadDone(true);
-                        setTimeout(() => setUploadDone(false), 2500);
-                    }, 400);
+                    setAvatarSrc(src);
+                    setIsUploading(false);
+                    toast.success("Profile photo updated successfully!");
                 }
-                setUploadProgress(progress);
-            }, 120);
+                setUploadProgress(Math.min(progress, 100));
+            }, 100);
         };
         reader.readAsDataURL(file);
-
-        // Reset the input so the same file can be re-uploaded
         e.target.value = "";
     };
 
     const handleRemove = () => {
         setAvatarSrc(null);
-        setUploadDone(false);
-        setUploadProgress(0);
+        toast.info("Reverted to name initials avatar.");
+    };
+
+    const handleFormSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onSave();
+        toast.success("Profile changes saved successfully!");
     };
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-300">
-
-            {/* Header */}
-            <div>
-                <h2 className="text-xl font-bold text-gray-900">Profile Information</h2>
-                <p className="text-sm text-gray-500 mt-1">Update your personal details and profile photo.</p>
-            </div>
-
-            {/* Avatar Section */}
-            <div className="flex flex-col sm:flex-row sm:items-start gap-6 pb-8 border-b border-gray-100">
-                {/* Avatar preview + progress ring */}
-                <div className="relative shrink-0 w-24 h-24">
-                    {/* Progress ring overlay during upload */}
-                    {isUploading && (
-                        <svg
-                            className="absolute inset-0 w-full h-full -rotate-90"
-                            viewBox="0 0 96 96"
-                        >
-                            <circle
-                                cx="48" cy="48" r="44"
-                                fill="none"
-                                stroke="#e5e7eb"
-                                strokeWidth="4"
-                            />
-                            <circle
-                                cx="48" cy="48" r="44"
-                                fill="none"
-                                stroke="#000"
-                                strokeWidth="4"
-                                strokeLinecap="round"
-                                strokeDasharray={`${2 * Math.PI * 44}`}
-                                strokeDashoffset={`${2 * Math.PI * 44 * (1 - uploadProgress / 100)}`}
-                                className="transition-all duration-150"
-                            />
-                        </svg>
-                    )}
-
-                    <div className={`w-24 h-24 rounded-full overflow-hidden border-2 ${isUploading ? "border-black/20" : "border-gray-200"} bg-gray-100 flex items-center justify-center`}>
+        <form onSubmit={handleFormSubmit} className="space-y-8 animate-in fade-in duration-300">
+            {/* Profile Avatar Section */}
+            <div className="rounded-2xl border border-gray-200/90 bg-gray-50/60 p-6 sm:p-7 flex flex-col sm:flex-row items-center sm:items-start gap-6">
+                {/* Avatar with Initials */}
+                <div className="relative shrink-0">
+                    <div className="w-24 h-24 rounded-2xl bg-black text-white flex items-center justify-center font-mono font-bold text-3xl shadow-sm border-2 border-white ring-4 ring-black/5 select-none overflow-hidden">
                         {isUploading ? (
                             <div className="flex flex-col items-center gap-1">
-                                <Loader2 size={22} className="text-black animate-spin" />
-                                <span className="text-[10px] font-bold text-black">{uploadProgress}%</span>
+                                <Loader2 size={24} className="animate-spin text-white" />
+                                <span className="text-[10px] font-mono">{uploadProgress}%</span>
                             </div>
                         ) : avatarSrc ? (
+                            // eslint-disable-next-line @next/next/no-img-element
                             <img src={avatarSrc} alt="Profile" className="w-full h-full object-cover" />
                         ) : (
-                            <img
-                                src="https://api.dicebear.com/7.x/avataaars/svg?seed=Amina"
-                                alt="Profile"
-                                className="w-full h-full object-cover"
-                            />
+                            <span className="tracking-tight">{initials}</span>
                         )}
                     </div>
 
-                    {/* Camera button (only when not uploading) */}
+                    {/* Camera Upload Button */}
                     {!isUploading && (
                         <button
                             type="button"
                             onClick={handleUploadClick}
-                            className="absolute bottom-0 right-0 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center border-2 border-white shadow-sm hover:bg-gray-800 transition-colors"
-                            aria-label="Upload profile photo"
+                            className="absolute -bottom-1.5 -right-1.5 w-8 h-8 bg-white text-black hover:bg-black hover:text-white rounded-full flex items-center justify-center border border-gray-200 shadow-md transition-colors"
+                            title="Upload custom photo"
+                            aria-label="Upload custom photo"
                         >
                             <Camera size={14} />
                         </button>
                     )}
                 </div>
 
-                {/* Hidden file input */}
                 <input
                     ref={fileInputRef}
                     type="file"
-                    accept="image/png,image/jpeg,image/gif,image/webp"
+                    accept="image/*"
                     className="hidden"
                     onChange={handleFileChange}
                 />
 
-                {/* Upload info & actions */}
-                <div className="flex flex-col justify-center gap-2">
-                    <h3 className="text-sm font-semibold text-gray-900">Profile Photo</h3>
-                    <p className="text-xs text-gray-500">PNG, JPG, GIF or WEBP. Max size 2 MB.</p>
+                {/* Avatar Info & Controls */}
+                <div className="space-y-2 text-center sm:text-left flex-1">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                        <h3 className="text-base font-bold text-gray-950">
+                            {firstName} {lastName}
+                        </h3>
+                        <span className="inline-flex items-center gap-1 self-center sm:self-auto rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 text-[11px] font-semibold">
+                            <ShieldCheck size={12} />
+                            Tier 2 Verified
+                        </span>
+                    </div>
 
-                    {/* Upload progress bar */}
-                    {isUploading && (
-                        <div className="mt-1 w-48">
-                            <div className="flex justify-between mb-1">
-                                <span className="text-[11px] font-semibold text-gray-700">Uploading…</span>
-                                <span className="text-[11px] font-bold text-black">{uploadProgress}%</span>
-                            </div>
-                            <div className="h-1.5 w-full rounded-full bg-gray-200 overflow-hidden">
-                                <div
-                                    className="h-full rounded-full bg-black transition-all duration-150"
-                                    style={{ width: `${uploadProgress}%` }}
-                                />
-                            </div>
-                        </div>
-                    )}
+                    <p className="text-xs text-gray-500 leading-relaxed max-w-md">
+                        Avatar displays your name initials (<span className="font-mono font-bold text-black">{initials}</span>) by default. You can upload an optional profile photo.
+                    </p>
 
-                    {/* Success message */}
-                    {uploadDone && !isUploading && (
-                        <div className="flex items-center gap-1.5 text-[12px] font-semibold text-green-700">
-                            <CheckCircle2 size={14} />
-                            Photo updated successfully
-                        </div>
-                    )}
-
-                    {!isUploading && (
-                        <div className="flex gap-3 mt-1">
+                    <div className="flex items-center justify-center sm:justify-start gap-2.5 pt-1">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="h-8 text-xs rounded-lg border-gray-200 font-semibold"
+                            onClick={handleUploadClick}
+                        >
+                            {avatarSrc ? "Change Photo" : "Upload Custom Photo"}
+                        </Button>
+                        {avatarSrc && (
                             <Button
                                 type="button"
-                                variant="outline"
+                                variant="ghost"
                                 size="sm"
-                                className="h-8 text-xs rounded-lg"
-                                onClick={handleUploadClick}
+                                className="h-8 text-xs rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50 gap-1"
+                                onClick={handleRemove}
                             >
-                                {avatarSrc ? "Change Photo" : "Upload Photo"}
+                                <Trash2 size={12} />
+                                Use Initials
                             </Button>
-                            {avatarSrc && (
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-8 text-xs rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50 gap-1"
-                                    onClick={handleRemove}
-                                >
-                                    <Trash2 size={12} />
-                                    Remove
-                                </Button>
-                            )}
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Form Fields in Clean Fintech Grid */}
+            <div className="space-y-6">
+                <div>
+                    <h3 className="text-sm font-bold text-gray-950">Legal & Personal Details</h3>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                        Your registered identity on Settle Africa compliance rails.
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    {/* First Name */}
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-black tracking-tight">
+                            First Name
+                        </label>
+                        <input
+                            type="text"
+                            value={firstName}
+                            onChange={(e) => setFirstName(e.target.value)}
+                            className="w-full h-11 rounded-xl border border-gray-200 bg-white px-3.5 text-sm font-medium text-gray-900 focus:border-black focus:outline-none focus:ring-1 focus:ring-black transition-colors"
+                        />
+                    </div>
+
+                    {/* Last Name */}
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-black tracking-tight">
+                            Last Name
+                        </label>
+                        <input
+                            type="text"
+                            value={lastName}
+                            onChange={(e) => setLastName(e.target.value)}
+                            className="w-full h-11 rounded-xl border border-gray-200 bg-white px-3.5 text-sm font-medium text-gray-900 focus:border-black focus:outline-none focus:ring-1 focus:ring-black transition-colors"
+                        />
+                    </div>
+
+                    {/* Email */}
+                    <div className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                            <label className="text-xs font-semibold text-black tracking-tight flex items-center gap-1.5">
+                                <Mail size={13} className="text-gray-400" />
+                                Email Address
+                            </label>
+                            <span className="text-[10px] font-mono text-emerald-600 font-bold uppercase">
+                                Verified
+                            </span>
                         </div>
-                    )}
+                        <input
+                            type="email"
+                            value={email}
+                            disabled
+                            className="w-full h-11 rounded-xl border border-gray-200 bg-gray-50/80 px-3.5 text-sm font-mono text-gray-600 cursor-not-allowed"
+                        />
+                    </div>
+
+                    {/* Phone Number */}
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-black tracking-tight flex items-center gap-1.5">
+                            <Phone size={13} className="text-gray-400" />
+                            Mobile Phone Number
+                        </label>
+                        <input
+                            type="tel"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            className="w-full h-11 rounded-xl border border-gray-200 bg-white px-3.5 text-sm font-mono text-gray-900 focus:border-black focus:outline-none focus:ring-1 focus:ring-black transition-colors"
+                        />
+                    </div>
+
+                    {/* Country of Residence */}
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-black tracking-tight flex items-center gap-1.5">
+                            <Globe size={13} className="text-gray-400" />
+                            Primary Country
+                        </label>
+                        <input
+                            type="text"
+                            value={country}
+                            onChange={(e) => setCountry(e.target.value)}
+                            className="w-full h-11 rounded-xl border border-gray-200 bg-white px-3.5 text-sm font-medium text-gray-900 focus:border-black focus:outline-none focus:ring-1 focus:ring-black transition-colors"
+                        />
+                    </div>
+
+                    {/* City / State */}
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-black tracking-tight flex items-center gap-1.5">
+                            <MapPin size={13} className="text-gray-400" />
+                            City / Address
+                        </label>
+                        <input
+                            type="text"
+                            value={city}
+                            onChange={(e) => setCity(e.target.value)}
+                            className="w-full h-11 rounded-xl border border-gray-200 bg-white px-3.5 text-sm font-medium text-gray-900 focus:border-black focus:outline-none focus:ring-1 focus:ring-black transition-colors"
+                        />
+                    </div>
+                </div>
+
+                {/* Bio / Description */}
+                <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-black tracking-tight">
+                        Account Description / Purpose
+                    </label>
+                    <textarea
+                        rows={3}
+                        value={bio}
+                        onChange={(e) => setBio(e.target.value)}
+                        className="w-full rounded-xl border border-gray-200 bg-white p-3.5 text-sm font-medium text-gray-900 focus:border-black focus:outline-none focus:ring-1 focus:ring-black transition-colors resize-none leading-relaxed"
+                    />
                 </div>
             </div>
 
-            {/* Form Fields */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-gray-700">First Name</label>
-                    <input
-                        type="text"
-                        defaultValue="Amina"
-                        className="w-full h-11 rounded-xl border border-gray-200 bg-white px-4 text-sm font-medium text-gray-900 focus:border-black focus:outline-none focus:ring-4 focus:ring-black/5 transition-all"
-                    />
-                </div>
-                <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-gray-700">Last Name</label>
-                    <input
-                        type="text"
-                        defaultValue="Yusuf"
-                        className="w-full h-11 rounded-xl border border-gray-200 bg-white px-4 text-sm font-medium text-gray-900 focus:border-black focus:outline-none focus:ring-4 focus:ring-black/5 transition-all"
-                    />
-                </div>
-                <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-gray-700">Email Address</label>
-                    <input
-                        type="email"
-                        defaultValue="amina.yusuf@example.com"
-                        className="w-full h-11 rounded-xl border border-gray-200 bg-gray-50 px-4 text-sm font-medium text-gray-500 cursor-not-allowed"
-                        disabled
-                    />
-                    <p className="text-[11px] text-gray-400">Email cannot be changed. Contact support.</p>
-                </div>
-                <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-gray-700">Phone Number</label>
-                    <input
-                        type="tel"
-                        defaultValue="+234 800 000 0000"
-                        className="w-full h-11 rounded-xl border border-gray-200 bg-white px-4 text-sm font-medium text-gray-900 focus:border-black focus:outline-none focus:ring-4 focus:ring-black/5 transition-all"
-                    />
-                </div>
-            </div>
-
-            <div className="space-y-1.5">
-                <label className="text-sm font-medium text-gray-700">Bio</label>
-                <textarea
-                    rows={3}
-                    defaultValue="Personal account holder at Settle Africa. Sending money across borders seamlessly."
-                    className="w-full rounded-xl border border-gray-200 bg-white p-4 text-sm font-medium text-gray-900 focus:border-black focus:outline-none focus:ring-4 focus:ring-black/5 transition-all resize-none"
-                />
-            </div>
-
-            {/* Action Footer */}
-            <div className="pt-6 border-t border-gray-100 flex justify-end gap-3">
-                <Button variant="outline" className="h-11 rounded-xl px-6">Cancel</Button>
+            {/* Save Button */}
+            <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
+                <span className="text-xs text-gray-400">
+                    Changes are synchronized across African correspondent clearing rails.
+                </span>
                 <Button
-                    onClick={onSave}
+                    type="submit"
                     disabled={isSaving}
-                    className="h-11 rounded-xl px-8 bg-black text-white hover:bg-gray-800 transition-all"
+                    className="h-11 rounded-xl px-7 bg-black text-white hover:bg-zinc-800 text-sm font-semibold transition-all flex items-center gap-2 shadow-xs"
                 >
-                    {isSaving ? <Loader2 size={16} className="animate-spin mr-2" /> : null}
-                    {isSaving ? "Saving..." : "Save Changes"}
+                    {isSaving ? <Loader2 size={16} className="animate-spin" /> : null}
+                    <span>{isSaving ? "Saving changes..." : "Save Changes"}</span>
                 </Button>
             </div>
-        </div>
+        </form>
     );
 }

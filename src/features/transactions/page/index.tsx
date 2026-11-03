@@ -26,7 +26,7 @@ export function TransactionsPage() {
             </div>
 
             <OverviewCards />
-            <RevenueChart />
+
             <TransactionsTable
                 transactions={transactions}
                 onSelect={setSelectedTx}

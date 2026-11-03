@@ -38,7 +38,7 @@ export function PhoneMockup() {
                 {/* Balance */}
                 <div className="px-6 py-3">
                     <p className="text-xs text-gray-500 mb-1 font-medium">Total balance</p>
-                    <h2 className="text-[32px] font-bold tracking-tight text-gray-900">$2,480.00</h2>
+                    <h2 className="text-[32px] font-bold tracking-tight text-gray-900">₦ 3,750,000</h2>
                 </div>
 
                 {/* Action Buttons */}
@@ -86,7 +86,7 @@ export function PhoneMockup() {
                                     <p className="text-[11px] text-gray-400">GCB - Completed</p>
                                 </div>
                             </div>
-                            <p className="text-[13px] font-bold text-green-500">+$ 120.50</p>
+                            <p className="text-[13px] font-bold text-green-500">+GH₵ 1,850</p>
                         </div>
 
                         {/* Transaction 3 */}
@@ -100,7 +100,7 @@ export function PhoneMockup() {
                                     <p className="text-[11px] text-gray-400">KCB - Completed</p>
                                 </div>
                             </div>
-                            <p className="text-[13px] font-bold text-gray-900">-₹ 15,000</p>
+                            <p className="text-[13px] font-bold text-gray-900">-KSh 15,000</p>
                         </div>
                     </div>
                 </div>

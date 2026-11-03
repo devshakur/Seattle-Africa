@@ -1,21 +1,19 @@
 "use client";
 
-import Link from "next/link"
+import Link from "next/link";
 import Image from "next/image";
-
 import { usePathname } from "next/navigation";
 import {
     LayoutDashboard,
     Send,
-    Download,
     ArrowLeftRight,
-    Wallet,
     Settings,
     HelpCircle,
     LogOut,
     ChevronDown,
     X,
-    Search
+    Search,
+    Bell,
 } from "lucide-react";
 import { cn } from "@/libs/utils";
 
@@ -24,6 +22,7 @@ const navItems = [
     { name: "Send Money", href: "/send-money", icon: Send },
     { name: "Transactions", href: "/transactions", icon: ArrowLeftRight },
     { name: "Track Transaction", href: "/track-transaction", icon: Search },
+    { name: "Notifications", href: "/notifications", icon: Bell },
     { name: "Settings", href: "/settings", icon: Settings },
 ];
 
@@ -50,8 +49,6 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             <aside
                 className={cn(
                     "w-[260px] h-screen bg-white border-r border-gray-100 flex flex-col fixed left-0 top-0 z-50 overflow-y-auto transition-transform duration-300 ease-in-out",
-                    // Slide in on mobile if isOpen, otherwise slide out (-translate-x-full).
-                    // On large screens (lg), keep it static and visible.
                     isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
                 )}
             >
@@ -63,25 +60,29 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     </Link>
 
                     {/* Close button visible only on mobile */}
-                    <button onClick={onClose} className="lg:hidden p-2 text-gray-500 hover:text-black hover:bg-gray-100 rounded-lg">
+                    <button onClick={onClose} className="lg:hidden p-2 text-gray-500 hover:text-black hover:bg-gray-100 rounded-lg" aria-label="Close sidebar">
                         <X size={20} />
                     </button>
                 </div>
 
                 {/* User Profile Snippet */}
                 <div className="px-4 mb-6">
-                    <div className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors">
+                    <Link
+                        href="/settings"
+                        onClick={onClose}
+                        className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors"
+                    >
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-gray-200 border border-gray-300 flex items-center justify-center overflow-hidden">
-                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Amina" alt="User" className="w-full h-full object-cover" />
+                            <div className="w-10 h-10 rounded-full bg-black text-white font-mono font-bold text-sm flex items-center justify-center border border-zinc-800 shadow-xs select-none shrink-0">
+                                AY
                             </div>
                             <div>
-                                <p className="text-sm font-semibold text-gray-900">Abdulshakur Dauda</p>
+                                <p className="text-sm font-semibold text-gray-900">Amina Yusuf</p>
                                 <p className="text-xs text-gray-500">Personal Account</p>
                             </div>
                         </div>
                         <ChevronDown size={16} className="text-gray-400" />
-                    </div>
+                    </Link>
                 </div>
 
                 {/* Navigation Links */}
@@ -92,7 +93,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                             <Link
                                 key={item.name}
                                 href={item.href}
-                                onClick={onClose} // Close menu when link is clicked
+                                onClick={onClose}
                                 className={cn(
                                     "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
                                     isActive

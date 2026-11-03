@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" width="900" height="600">
+  <rect width="900" height="200" fill="#CE1126"/>
+  <rect y="200" width="900" height="200" fill="#FFFFFF"/>
+  <rect y="400" width="900" height="200" fill="#000000"/>
+  <!-- Eagle of Saladin in center -->
+  <g transform="translate(450, 300) scale(0.65)">
+    <path d="M-30,-50 C-10,-60 10,-60 30,-50 C45,-30 40,-10 35,20 C30,45 15,60 0,65 C-15,60 -30,45 -35,20 C-40,-10 -45,-30 -30,-50 Z" fill="#C09A35"/>
+    <circle cx="0" cy="-35" r="14" fill="#C09A35"/>
+  </g>
+</svg>
+

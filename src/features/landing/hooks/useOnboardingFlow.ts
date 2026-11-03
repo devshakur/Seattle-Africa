@@ -12,10 +12,10 @@ export function useOnboardingFlow() {
     const [isFetchingAccount, setIsFetchingAccount] = useState(false);
     const [error, setError] = useState("");
 
-    // Live Fee Calculation (Simulated: $2 flat fee for transfers over $10)
+    // Live Fee Calculation (Simulated: 0.2% transparent African corridor fee)
     const fee = useMemo(() => {
         const numAmount = parseFloat(amount) || 0;
-        return numAmount > 10 ? 2.00 : 0;
+        return numAmount > 0 ? numAmount * 0.002 : 0;
     }, [amount]);
 
     const total = useMemo(() => {
@@ -61,12 +61,23 @@ export function useOnboardingFlow() {
     };
 
     return {
-        step, nextStep, prevStep, reset,
-        amount, setAmount,
-        country, setCountry,
-        bankName, setBankName,
-        accountNumber, setAccountNumber,
-        accountName, verifyAccount, isFetchingAccount, error,
-        fee, total
+        step,
+        amount,
+        country,
+        bankName,
+        accountNumber,
+        accountName,
+        isFetchingAccount,
+        error,
+        fee,
+        total,
+        setAmount,
+        setCountry,
+        setBankName,
+        setAccountNumber,
+        nextStep,
+        prevStep,
+        verifyAccount,
+        reset,
     };
 }

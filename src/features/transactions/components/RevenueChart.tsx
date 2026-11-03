@@ -1,7 +1,12 @@
+"use client";
+
 import { Card } from "@/components/ui/Card";
 import { ChevronDown } from "lucide-react";
+import { useCurrency } from "@/features/currency/CurrencyContext";
 
 export function RevenueChart() {
+    const { formatAmount } = useCurrency();
+
     return (
         <Card className="p-6 mb-6">
             {/* Header Section */}
@@ -12,12 +17,16 @@ export function RevenueChart() {
                         <div className="flex items-center gap-2">
                             <div className="w-3 h-3 rounded-full bg-black" />
                             <span className="text-xs text-gray-500">Gross Volume</span>
-                            <span className="text-sm font-bold text-gray-900 ml-2">$48,580</span>
+                            <span className="text-sm font-bold text-gray-900 ml-2">
+                                {formatAmount(73841600)}
+                            </span>
                         </div>
                         <div className="flex items-center gap-2">
                             <div className="w-3 h-3 rounded-full bg-gray-300" />
                             <span className="text-xs text-gray-500">Net Volume</span>
-                            <span className="text-sm font-bold text-gray-900 ml-2">$29,540</span>
+                            <span className="text-sm font-bold text-gray-900 ml-2">
+                                {formatAmount(44900800)}
+                            </span>
                         </div>
                     </div>
                 </div>
