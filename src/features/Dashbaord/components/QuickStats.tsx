@@ -10,7 +10,7 @@ export function QuickStats() {
     const stats = [
         {
             title: "Total Sent",
-            amount: formatAmount(1420000),
+            amount: formatAmount(1420),
             trend: "+ 18%",
             trendUp: true,
             icon: ArrowUpRight,
@@ -19,15 +19,17 @@ export function QuickStats() {
             title: "Total Received",
             amount: formatAmount(1030000),
             trend: "- 2%",
+            subtitle: "Across 3 African countries",
             trendUp: false,
             icon: ArrowDownRight,
         },
         {
-            title: "Active Recipients",
+            title: "Pending Transactions",
             amount: "24",
             subtitle: "Across 6 African countries",
             icon: Users,
         },
+
     ];
 
     return (
@@ -40,11 +42,10 @@ export function QuickStats() {
                         </div>
                         {stat.trend && (
                             <span
-                                className={`text-xs font-bold px-2 py-1 rounded-md ${
-                                    stat.trendUp
-                                        ? "bg-gray-100 text-black"
-                                        : "bg-gray-100 text-gray-500"
-                                }`}
+                                className={`text-xs font-bold px-2 py-1 rounded-md ${stat.trendUp
+                                    ? "bg-gray-100 text-black"
+                                    : "bg-gray-100 text-gray-500"
+                                    }`}
                             >
                                 {stat.trend}
                             </span>

@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
 import {
     Bell,
     ShieldAlert,
     Ticket,
     ArrowRightLeft,
+    ArrowRight,
     Check,
     Copy,
     X,
@@ -332,13 +334,20 @@ export function NotificationDropdown() {
 
                         {/* Footer */}
                         <div className="pt-3 mt-2 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
-                            <span className="text-[11px]">Settle Africa Security & Telemetry</span>
+                            <Link
+                                href="/notifications"
+                                onClick={() => setIsOpen(false)}
+                                className="font-semibold text-black hover:underline flex items-center gap-1"
+                            >
+                                <span>View all notifications</span>
+                                <ArrowRight size={12} />
+                            </Link>
                             <button
                                 type="button"
                                 onClick={markAllAsRead}
-                                className="font-medium text-black hover:underline"
+                                className="text-[11px] font-medium text-gray-500 hover:text-black transition-colors"
                             >
-                                All caught up
+                                Mark all read
                             </button>
                         </div>
                     </motion.div>

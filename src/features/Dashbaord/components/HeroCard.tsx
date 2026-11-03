@@ -46,8 +46,8 @@ export function HeroCard() {
                 <div className="flex gap-3 sm:gap-4">
                     {[
                         { label: "Send", icon: Send, href: "/send-money" },
-                        { label: "Receive", icon: Download, href: "/receive" },
-                        { label: "Exchange", icon: RefreshCw, href: "#" },
+                        { label: "Receive", icon: Download, href: "/transactions" },
+                        { label: "Exchange", icon: RefreshCw, href: "/send-money" },
                         { label: "New", icon: Plus, href: "/send-money" },
                     ].map((action) => (
                         <Link

@@ -124,6 +124,11 @@ export function LoginForm() {
 
         // 4. Simulate Navigation
         setTimeout(() => {
+            try {
+                sessionStorage.setItem("settle_africa_dashboard_skeleton", "1");
+            } catch {
+                // ignore storage errors
+            }
             router.push("/dashboard");
         }, 1800);
     };

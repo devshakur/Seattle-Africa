@@ -13,6 +13,7 @@ import {
     ChevronDown,
     X,
     Search,
+    Bell,
 } from "lucide-react";
 import { cn } from "@/libs/utils";
 
@@ -21,6 +22,7 @@ const navItems = [
     { name: "Send Money", href: "/send-money", icon: Send },
     { name: "Transactions", href: "/transactions", icon: ArrowLeftRight },
     { name: "Track Transaction", href: "/track-transaction", icon: Search },
+    { name: "Notifications", href: "/notifications", icon: Bell },
     { name: "Settings", href: "/settings", icon: Settings },
 ];
 
@@ -65,25 +67,22 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
                 {/* User Profile Snippet */}
                 <div className="px-4 mb-6">
-                    <div className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors">
+                    <Link
+                        href="/settings"
+                        onClick={onClose}
+                        className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors"
+                    >
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-gray-200 border border-gray-300 flex items-center justify-center overflow-hidden">
-                                <Image
-                                    src="https://api.dicebear.com/7.x/avataaars/svg?seed=Amina"
-                                    alt="User avatar"
-                                    width={40}
-                                    height={40}
-                                    unoptimized
-                                    className="w-full h-full object-cover"
-                                />
+                            <div className="w-10 h-10 rounded-full bg-black text-white font-mono font-bold text-sm flex items-center justify-center border border-zinc-800 shadow-xs select-none shrink-0">
+                                AY
                             </div>
                             <div>
-                                <p className="text-sm font-semibold text-gray-900">Abdulshakur Dauda</p>
+                                <p className="text-sm font-semibold text-gray-900">Amina Yusuf</p>
                                 <p className="text-xs text-gray-500">Personal Account</p>
                             </div>
                         </div>
                         <ChevronDown size={16} className="text-gray-400" />
-                    </div>
+                    </Link>
                 </div>
 
                 {/* Navigation Links */}
