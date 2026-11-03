@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useMemo, useState } from "react";
@@ -13,15 +12,17 @@ import {
     ArrowUpDown,
     ChevronLeft,
     ChevronRight,
+    RefreshCw,
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
+import { useCurrency } from "@/features/currency/CurrencyContext";
 
 const transactions = [
     {
         id: "TRX-8921",
         type: "Received from John Smith",
         category: "Incoming Transfer",
-        amount: "+$500.00",
+        rawAmountNgn: 760000,
         status: "Completed",
         date: "Sep 24, 2025 • 14:32",
         recipient: "John Smith",
@@ -32,7 +33,7 @@ const transactions = [
         id: "TRX-8920",
         type: "Sent to Business Partner",
         category: "Outgoing Transfer",
-        amount: "-$100.00",
+        rawAmountNgn: -152000,
         status: "Completed",
         date: "Sep 23, 2025 • 11:17",
         recipient: "Acme Corp",
@@ -43,7 +44,7 @@ const transactions = [
         id: "TRX-8919",
         type: "Card Purchase",
         category: "Platform Fee",
-        amount: "-$2.00",
+        rawAmountNgn: -3040,
         status: "Completed",
         date: "Sep 22, 2025 • 19:45",
         recipient: "Stripe",
@@ -54,7 +55,7 @@ const transactions = [
         id: "TRX-8918",
         type: "Sent to Amina Yusuf",
         category: "Outgoing Transfer",
-        amount: "-$300.00",
+        rawAmountNgn: -456000,
         status: "Pending",
         date: "Sep 21, 2025 • 16:20",
         recipient: "Amina Yusuf",
@@ -75,12 +76,21 @@ function parseTransactionDate(date: string) {
 }
 
 export function RecentTransactions() {
+    const { formatAmount } = useCurrency();
     const [search, setSearch] = useState("");
     const [sortKey, setSortKey] = useState<SortKey>("date");
     const [sortDirection, setSortDirection] =
         useState<SortDirection>("desc");
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(5);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleRefresh = () => {
+        setIsLoading(true);
+        setTimeout(() => {
+            setIsLoading(false);
+        }, 850);
+    };
 
     const filteredTransactions = useMemo(() => {
         const query = search.trim().toLowerCase();
@@ -91,7 +101,7 @@ export function RecentTransactions() {
                 tx.type,
                 tx.category,
                 tx.recipient,
-                tx.amount,
+                formatAmount(tx.rawAmountNgn, { showSign: true }),
                 tx.status,
                 tx.date,
             ].some((value) => value.toLowerCase().includes(query)),
@@ -102,8 +112,8 @@ export function RecentTransactions() {
 
             if (sortKey === "amount") {
                 comparison =
-                    Math.abs(Number(a.amount.replace(/[^0-9.-]/g, ""))) -
-                    Math.abs(Number(b.amount.replace(/[^0-9.-]/g, "")));
+                    Math.abs(a.rawAmountNgn) -
+                    Math.abs(b.rawAmountNgn);
             } else if (sortKey === "date") {
                 comparison =
                     parseTransactionDate(a.date) -
@@ -114,7 +124,7 @@ export function RecentTransactions() {
 
             return sortDirection === "asc" ? comparison : -comparison;
         });
-    }, [search, sortKey, sortDirection]);
+    }, [search, sortKey, sortDirection, formatAmount]);
 
     const totalPages = Math.max(
         1,
@@ -148,21 +158,15 @@ export function RecentTransactions() {
             <button
                 type="button"
                 onClick={() => handleSort(key)}
-                className={`inline-flex items-center gap-1.5 whitespace-nowrap transition-colors hover:text-slate-700 ${isActive ? "text-slate-700" : "text-slate-400"
-                    }`}
+                className={`inline-flex items-center gap-1.5 whitespace-nowrap transition-colors hover:text-slate-700 ${
+                    isActive ? "text-slate-900 font-bold" : "text-slate-400"
+                }`}
                 aria-label={`Sort by ${label}`}
-                aria-sort={
-                    isActive
-                        ? sortDirection === "asc"
-                            ? "ascending"
-                            : "descending"
-                        : "none"
-                }
             >
-                {label}
+                <span>{label}</span>
                 <ArrowUpDown
                     size={12}
-                    className={isActive ? "text-blue-600" : ""}
+                    className={isActive ? "text-black" : "text-slate-400"}
                 />
             </button>
         );
@@ -179,7 +183,7 @@ export function RecentTransactions() {
     );
 
     return (
-        <Card className="mb-6 overflow-hidden border-slate-200/80 shadow-sm shadow-slate-100">
+        <Card className="mb-6 overflow-hidden border-slate-200/80 shadow-xs">
             {/* Header */}
             <div className="flex flex-col gap-4 border-b border-slate-100 bg-white p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
                 <div>
@@ -191,12 +195,29 @@ export function RecentTransactions() {
                     </p>
                 </div>
 
-                <Link
-                    href="#"
-                    className="inline-flex w-fit items-center gap-1.5 rounded-lg border border-blue-100/60 bg-blue-50/80 px-3 py-1.5 text-xs font-semibold text-blue-600 transition-colors hover:text-blue-700"
-                >
-                    View all <ArrowRight size={13} />
-                </Link>
+                <div className="flex items-center gap-2">
+                    <button
+                        type="button"
+                        onClick={handleRefresh}
+                        disabled={isLoading}
+                        title="Refresh transactions"
+                        aria-label="Refresh transactions"
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 hover:text-black hover:border-gray-400 transition-colors disabled:opacity-50"
+                    >
+                        <RefreshCw
+                            size={13}
+                            className={isLoading ? "animate-spin text-black" : "text-gray-500"}
+                        />
+                        <span className="hidden sm:inline">Refresh</span>
+                    </button>
+
+                    <Link
+                        href="/transactions"
+                        className="inline-flex w-fit items-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-semibold text-gray-900 transition-colors hover:bg-black hover:text-white hover:border-black"
+                    >
+                        View all <ArrowRight size={13} />
+                    </Link>
+                </div>
             </div>
 
             {/* Search and page size */}
@@ -215,7 +236,7 @@ export function RecentTransactions() {
                         }}
                         placeholder="Search transactions..."
                         aria-label="Search transactions"
-                        className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                        className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-black focus:ring-1 focus:ring-black"
                     />
                 </div>
 
@@ -230,7 +251,7 @@ export function RecentTransactions() {
                             setPageSize(Number(event.target.value));
                             setCurrentPage(1);
                         }}
-                        className="h-9 rounded-lg border border-slate-200 bg-white px-2 text-sm text-slate-700 outline-none focus:border-blue-400"
+                        className="h-9 rounded-lg border border-slate-200 bg-white px-2 text-sm text-slate-700 outline-none focus:border-black"
                     >
                         <option value={5}>5</option>
                         <option value={10}>10</option>
@@ -243,21 +264,36 @@ export function RecentTransactions() {
             {/* Table */}
             <div className="overflow-x-auto">
                 <table className="w-full min-w-[850px] text-left text-sm">
-                    <thead className="border-b border-slate-100 bg-slate-50/70 text-[11px] font-semibold uppercase tracking-wider">
+                    <thead className="border-b border-slate-100 bg-slate-50/70 text-[11px] font-semibold uppercase tracking-wider text-slate-600">
                         <tr>
-                            <th className="px-6 py-3">
+                            <th
+                                className="px-6 py-3"
+                                aria-sort={sortKey === "type" ? (sortDirection === "asc" ? "ascending" : "descending") : "none"}
+                            >
                                 {renderSortHeader("Transaction", "type")}
                             </th>
-                            <th className="px-6 py-3">
+                            <th
+                                className="px-6 py-3"
+                                aria-sort={sortKey === "recipient" ? (sortDirection === "asc" ? "ascending" : "descending") : "none"}
+                            >
                                 {renderSortHeader("Recipient / Source", "recipient")}
                             </th>
-                            <th className="px-6 py-3">
+                            <th
+                                className="px-6 py-3"
+                                aria-sort={sortKey === "amount" ? (sortDirection === "asc" ? "ascending" : "descending") : "none"}
+                            >
                                 {renderSortHeader("Amount", "amount")}
                             </th>
-                            <th className="px-6 py-3">
+                            <th
+                                className="px-6 py-3"
+                                aria-sort={sortKey === "status" ? (sortDirection === "asc" ? "ascending" : "descending") : "none"}
+                            >
                                 {renderSortHeader("Status", "status")}
                             </th>
-                            <th className="px-6 py-3">
+                            <th
+                                className="px-6 py-3"
+                                aria-sort={sortKey === "date" ? (sortDirection === "asc" ? "ascending" : "descending") : "none"}
+                            >
                                 {renderSortHeader("Date", "date")}
                             </th>
                             <th className="px-6 py-3 text-right">
@@ -267,91 +303,127 @@ export function RecentTransactions() {
                     </thead>
 
                     <tbody className="divide-y divide-slate-100 bg-white">
-                        {paginatedTransactions.map((tx: Transaction) => {
-                            const IconComponent = tx.icon;
-                            const isPositive = tx.amount.startsWith("+");
-
-                            return (
-                                <tr
-                                    key={tx.id}
-                                    className="group transition-colors hover:bg-slate-50/60"
-                                >
-                                    {/* Transaction */}
+                        {isLoading ? (
+                            /* Sleek, pulsing black/gray skeleton loaders replacing generic spinners */
+                            Array.from({ length: pageSize }).map((_, idx) => (
+                                <tr key={idx} className="animate-pulse" aria-hidden="true">
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
-                                            <div
-                                                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border ${tx.iconBg}`}
-                                            >
-                                                <IconComponent size={16} />
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-semibold text-slate-900">
-                                                    {tx.type}
-                                                </p>
-                                                <p className="mt-0.5 font-mono text-xs text-slate-400">
-                                                    {tx.id}
-                                                </p>
+                                            <div className="h-9 w-9 shrink-0 rounded-xl bg-zinc-200" />
+                                            <div className="space-y-1.5">
+                                                <div className="h-4 w-36 rounded bg-zinc-200" />
+                                                <div className="h-3 w-20 rounded bg-zinc-100" />
                                             </div>
                                         </div>
                                     </td>
-
-                                    {/* Recipient */}
                                     <td className="px-6 py-4">
-                                        <span className="font-medium text-slate-700">
-                                            {tx.recipient}
-                                        </span>
+                                        <div className="h-4 w-28 rounded bg-zinc-200" />
                                     </td>
-
-                                    {/* Amount */}
                                     <td className="px-6 py-4">
-                                        <span
-                                            className={`font-bold tracking-tight ${isPositive
-                                                    ? "text-emerald-600"
-                                                    : "text-slate-900"
-                                                }`}
-                                        >
-                                            {tx.amount}
-                                        </span>
+                                        <div className="h-4 w-20 rounded bg-zinc-200" />
                                     </td>
-
-                                    {/* Status */}
                                     <td className="px-6 py-4">
-                                        <span
-                                            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${tx.status === "Completed"
-                                                    ? "border-emerald-200/60 bg-emerald-50/80 text-emerald-700"
-                                                    : "border-amber-200/60 bg-amber-50/80 text-amber-700"
-                                                }`}
-                                        >
-                                            <span
-                                                className={`h-1.5 w-1.5 rounded-full ${tx.status === "Completed"
-                                                        ? "bg-emerald-500"
-                                                        : "animate-pulse bg-amber-500"
-                                                    }`}
-                                            />
-                                            {tx.status}
-                                        </span>
+                                        <div className="h-6 w-20 rounded-full bg-zinc-200" />
                                     </td>
-
-                                    {/* Date */}
-                                    <td className="whitespace-nowrap px-6 py-4 text-xs font-medium text-slate-500">
-                                        {tx.date}
+                                    <td className="px-6 py-4">
+                                        <div className="h-4 w-28 rounded bg-zinc-200" />
                                     </td>
-
-                                    {/* Actions */}
                                     <td className="px-6 py-4 text-right">
-                                        <button
-                                            type="button"
-                                            aria-label={`More actions for ${tx.id}`}
-                                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
-                                        >
-                                            <MoreHorizontal size={16} />
-                                        </button>
+                                        <div className="ml-auto h-7 w-7 rounded-lg bg-zinc-100" />
                                     </td>
                                 </tr>
-                            );
-                        })}
+                            ))
+                        ) : (
+                            paginatedTransactions.map((tx: Transaction) => {
+                                const IconComponent = tx.icon;
+                                const isPositive = tx.rawAmountNgn > 0;
+                                const formattedVal = formatAmount(tx.rawAmountNgn, { showSign: true });
 
-                        {paginatedTransactions.length === 0 && (
+                                return (
+                                    <tr
+                                        key={tx.id}
+                                        className="group transition-colors hover:bg-slate-50/60"
+                                    >
+                                        {/* Transaction */}
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <div
+                                                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border ${tx.iconBg}`}
+                                                >
+                                                    <IconComponent size={16} />
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-semibold text-slate-900">
+                                                        {tx.type}
+                                                    </p>
+                                                    <p className="mt-0.5 font-mono text-xs text-slate-400 font-tabular-nums tabular-nums">
+                                                        {tx.id}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        {/* Recipient */}
+                                        <td className="px-6 py-4">
+                                            <span className="font-medium text-slate-700">
+                                                {tx.recipient}
+                                            </span>
+                                        </td>
+
+                                        {/* Amount */}
+                                        <td className="px-6 py-4">
+                                            <span
+                                                className={`font-bold tracking-tight font-mono font-tabular-nums tabular-nums ${
+                                                    isPositive
+                                                        ? "text-emerald-600"
+                                                        : "text-slate-900"
+                                                }`}
+                                            >
+                                                {formattedVal}
+                                            </span>
+                                        </td>
+
+                                        {/* Status */}
+                                        <td className="px-6 py-4">
+                                            <span
+                                                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${
+                                                    tx.status === "Completed"
+                                                        ? "border-emerald-200/60 bg-emerald-50/80 text-emerald-700"
+                                                        : "border-amber-200/60 bg-amber-50/80 text-amber-700"
+                                                }`}
+                                            >
+                                                <span
+                                                    className={`h-1.5 w-1.5 rounded-full ${
+                                                        tx.status === "Completed"
+                                                            ? "bg-emerald-500"
+                                                            : "animate-pulse bg-amber-500"
+                                                    }`}
+                                                />
+                                                {tx.status}
+                                            </span>
+                                        </td>
+
+                                        {/* Date */}
+                                        <td className="whitespace-nowrap px-6 py-4 text-xs font-medium text-slate-500 font-mono font-tabular-nums tabular-nums">
+                                            {tx.date}
+                                        </td>
+
+                                        {/* Actions */}
+                                        <td className="px-6 py-4 text-right">
+                                            <button
+                                                type="button"
+                                                aria-label={`More actions for ${tx.id}`}
+                                                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+                                            >
+                                                <MoreHorizontal size={16} />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                );
+                            })
+                        )}
+
+                        {!isLoading && paginatedTransactions.length === 0 && (
                             <tr>
                                 <td
                                     colSpan={6}
@@ -380,11 +452,11 @@ export function RecentTransactions() {
             <div className="flex flex-col gap-3 border-t border-slate-100 bg-white px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                 <p className="text-xs text-slate-500">
                     Showing{" "}
-                    <span className="font-semibold text-slate-700">
+                    <span className="font-semibold text-slate-700 font-mono font-tabular-nums tabular-nums">
                         {startItem}–{endItem}
                     </span>{" "}
                     of{" "}
-                    <span className="font-semibold text-slate-700">
+                    <span className="font-semibold text-slate-700 font-mono font-tabular-nums tabular-nums">
                         {filteredTransactions.length}
                     </span>{" "}
                     transactions
@@ -403,7 +475,7 @@ export function RecentTransactions() {
                         Previous
                     </button>
 
-                    <span className="min-w-16 text-center text-xs text-slate-500">
+                    <span className="min-w-16 text-center text-xs text-slate-500 font-mono font-tabular-nums tabular-nums">
                         Page {safePage} of {totalPages}
                     </span>
 

@@ -24,12 +24,37 @@ interface Props {
     onBack: () => void;
 }
 
-// Re-using mock data for calculations
-const usdRates: Record<string, number> = { USD: 1, GBP: 1.27, EUR: 1.08, CAD: 0.74 };
+const africanRatesToNgn: Record<string, number> = {
+    NGN: 1,
+    ZAR: 91.38,
+    KES: 11.74,
+    GHS: 97.46,
+    XOF: 2.59,
+    EGP: 31.15,
+    RWF: 1.14,
+    UGX: 0.41,
+};
+
+const currencySymbols: Record<string, string> = {
+    NGN: "₦",
+    ZAR: "R ",
+    KES: "KSh ",
+    GHS: "GH₵ ",
+    XOF: "CFA ",
+    EGP: "E£ ",
+    RWF: "FRw ",
+    UGX: "USh ",
+};
+
 const countries = [
-    { code: "NG", name: "Nigeria", currency: "NGN", symbol: "₦", flag: "🇳🇬", rateToUsd: 1450 },
-    { code: "GH", name: "Ghana", currency: "GHS", symbol: "₵", flag: "🇬🇭", rateToUsd: 15.2 },
-    { code: "KE", name: "Kenya", currency: "KES", symbol: "KSh", flag: "🇰🇪", rateToUsd: 130.5 },
+    { code: "NG", name: "Nigeria", currency: "NGN", symbol: "₦", flag: "🇳🇬" },
+    { code: "ZA", name: "South Africa", currency: "ZAR", symbol: "R", flag: "🇿🇦" },
+    { code: "KE", name: "Kenya", currency: "KES", symbol: "KSh", flag: "🇰🇪" },
+    { code: "GH", name: "Ghana", currency: "GHS", symbol: "GH₵", flag: "🇬🇭" },
+    { code: "SN", name: "Senegal", currency: "XOF", symbol: "CFA", flag: "🇸🇳" },
+    { code: "EG", name: "Egypt", currency: "EGP", symbol: "E£", flag: "🇪🇬" },
+    { code: "RW", name: "Rwanda", currency: "RWF", symbol: "FRw", flag: "🇷🇼" },
+    { code: "UG", name: "Uganda", currency: "UGX", symbol: "USh", flag: "🇺🇬" },
 ];
 
 export function StepReviewTransfer({
@@ -45,18 +70,15 @@ export function StepReviewTransfer({
     const numAmount = parseFloat(amount) || 0;
     const selectedCountry = countries.find((c) => c.name === country);
 
-    const fee = numAmount > 0 ? (sendCurrency === "USD" ? 2.0 : 2.0 / usdRates[sendCurrency]) : 0;
+    const fromRate = africanRatesToNgn[sendCurrency] || 1;
+    const toRate = selectedCountry ? africanRatesToNgn[selectedCountry.currency] || 1 : 1;
+    const displayRate = fromRate / toRate;
+    const convertedAmount = numAmount * displayRate;
+
+    const fee = numAmount > 0 ? numAmount * 0.002 : 0;
     const total = numAmount + fee;
 
-    let displayRate = 0;
-    let convertedAmount = 0;
-
-    if (selectedCountry) {
-        displayRate = selectedCountry.rateToUsd / usdRates[sendCurrency];
-        convertedAmount = numAmount * displayRate;
-    }
-
-    const currentSymbol = sendCurrency === "GBP" ? "£" : sendCurrency === "EUR" ? "€" : "$";
+    const currentSymbol = currencySymbols[sendCurrency] || "₦";
 
     return (
         <div className="mx-auto w-full max-w-5xl animate-in fade-in-50 slide-in-from-bottom-4 duration-500">
@@ -65,7 +87,7 @@ export function StepReviewTransfer({
             <div className="mb-8">
                 <div className="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-800 mb-3">
                     <Globe2 size={13} />
-                    <span>Almost there</span>
+                    <span>Pan-African Settlement</span>
                 </div>
                 <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
                     Review Transfer
@@ -188,12 +210,12 @@ export function StepReviewTransfer({
                                 <span className="font-medium text-gray-900">{currentSymbol}{numAmount.toFixed(2)}</span>
                             </div>
                             <div className="flex justify-between text-gray-600">
-                                <span>Transfer Fee</span>
+                                <span>Transfer Fee (0.2%)</span>
                                 <span className="font-medium text-gray-900">{currentSymbol}{fee.toFixed(2)}</span>
                             </div>
                             <div className="flex justify-between text-gray-600">
                                 <span>Exchange Rate</span>
-                                <span className="font-medium text-gray-900">1 {sendCurrency} = {displayRate.toFixed(2)} {selectedCountry?.currency}</span>
+                                <span className="font-medium text-gray-900">1 {sendCurrency} = {displayRate.toFixed(4)} {selectedCountry?.currency}</span>
                             </div>
 
                             <div className="h-px w-full bg-gray-200 my-2" />
@@ -208,13 +230,13 @@ export function StepReviewTransfer({
                             <div className="flex items-start gap-3">
                                 <Clock size={16} className="text-gray-400 mt-0.5 shrink-0" />
                                 <p className="text-xs text-gray-500 leading-relaxed">
-                                    Funds will arrive in the recipient's account within <strong className="text-gray-900">5-10 minutes</strong> after payment is confirmed.
+                                    Direct Pan-African interbank settlement clears within seconds of authorization.
                                 </p>
                             </div>
                             <div className="flex items-start gap-3">
                                 <Zap size={16} className="text-gray-400 mt-0.5 shrink-0" />
                                 <p className="text-xs text-gray-500 leading-relaxed">
-                                    Exchange rate is guaranteed for this transaction.
+                                    Direct central bank corridor rate is locked for this transaction.
                                 </p>
                             </div>
                         </div>

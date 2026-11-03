@@ -11,9 +11,9 @@ export function useSendMoneyFlow() {
     const [method, setMethod] = useState<PaymentMethod>("bank");
     const [status, setStatus] = useState<FlowStatus>(null);
 
-    // Transfer State
+    // Transfer State (defaults to African NGN baseline)
     const [amount, setAmount] = useState("");
-    const [sendCurrency, setSendCurrency] = useState("USD");
+    const [sendCurrency, setSendCurrency] = useState("NGN");
     const [country, setCountry] = useState("");
     const [accountNumber, setAccountNumber] = useState("");
     const [accountName, setAccountName] = useState("");
@@ -43,7 +43,7 @@ export function useSendMoneyFlow() {
         setStep("transfer-details");
         setStatus(null);
         setAmount("");
-        setSendCurrency("USD");
+        setSendCurrency("NGN");
         setCountry("");
         setAccountNumber("");
         setAccountName("");
@@ -53,16 +53,22 @@ export function useSendMoneyFlow() {
     return {
         step,
         method,
-        setMethod,
         status,
+        amount,
+        sendCurrency,
+        country,
+        accountNumber,
+        accountName,
+        bankName,
+        setMethod,
+        setAmount,
+        setSendCurrency,
+        setCountry,
+        setAccountNumber,
+        setAccountName,
+        setBankName,
         nextStep,
         prevStep,
         resetFlow,
-        amount, setAmount,
-        sendCurrency, setSendCurrency,
-        country, setCountry,
-        accountNumber, setAccountNumber,
-        accountName, setAccountName,
-        bankName, setBankName,
     };
 }

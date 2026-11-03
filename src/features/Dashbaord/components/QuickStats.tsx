@@ -1,30 +1,35 @@
-import { ArrowUpRight, ArrowDownRight, Clock, Users } from "lucide-react";
-import { Card } from "@/components/ui/Card";
+"use client";
 
-const stats = [
-    {
-        title: "Total Sent",
-        amount: "$0.00",
-        trend: "+ 18%",
-        trendUp: true,
-        icon: ArrowUpRight,
-    },
-    {
-        title: "Total Received",
-        amount: "$0.00",
-        trend: "- 2%",
-        trendUp: false,
-        icon: ArrowDownRight,
-    },
-    {
-        title: "Active Recipients",
-        amount: "24",
-        subtitle: "Across 3 countries",
-        icon: Users,
-    },
-];
+import { ArrowUpRight, ArrowDownRight, Users } from "lucide-react";
+import { Card } from "@/components/ui/Card";
+import { useCurrency } from "@/features/currency/CurrencyContext";
 
 export function QuickStats() {
+    const { formatAmount } = useCurrency();
+
+    const stats = [
+        {
+            title: "Total Sent",
+            amount: formatAmount(1420000),
+            trend: "+ 18%",
+            trendUp: true,
+            icon: ArrowUpRight,
+        },
+        {
+            title: "Total Received",
+            amount: formatAmount(1030000),
+            trend: "- 2%",
+            trendUp: false,
+            icon: ArrowDownRight,
+        },
+        {
+            title: "Active Recipients",
+            amount: "24",
+            subtitle: "Across 6 African countries",
+            icon: Users,
+        },
+    ];
+
     return (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             {stats.map((stat, i) => (
@@ -34,16 +39,29 @@ export function QuickStats() {
                             <stat.icon size={18} />
                         </div>
                         {stat.trend && (
-                            <span className={`text-xs font-bold px-2 py-1 rounded-md ${stat.trendUp ? "bg-gray-100 text-black" : "bg-gray-100 text-gray-500"
-                                }`}>
+                            <span
+                                className={`text-xs font-bold px-2 py-1 rounded-md ${
+                                    stat.trendUp
+                                        ? "bg-gray-100 text-black"
+                                        : "bg-gray-100 text-gray-500"
+                                }`}
+                            >
                                 {stat.trend}
                             </span>
                         )}
                     </div>
                     <div>
-                        <p className="text-sm font-medium text-gray-500 mb-1">{stat.title}</p>
-                        <h3 className="text-lg font-semibold text-gray-900">{stat.amount}</h3>
-                        {stat.subtitle && <p className="text-xs text-gray-400 mt-1">{stat.subtitle}</p>}
+                        <p className="text-sm font-medium text-gray-500 mb-1">
+                            {stat.title}
+                        </p>
+                        <h3 className="text-lg font-semibold text-gray-900 font-mono font-tabular-nums tabular-nums">
+                            {stat.amount}
+                        </h3>
+                        {stat.subtitle && (
+                            <p className="text-xs text-gray-400 mt-1">
+                                {stat.subtitle}
+                            </p>
+                        )}
                     </div>
                 </Card>
             ))}

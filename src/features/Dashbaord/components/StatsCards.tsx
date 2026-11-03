@@ -1,30 +1,35 @@
+"use client";
+
 import { Card } from "@/components/ui/Card";
 import { ArrowUpRight, ArrowDownRight, Wallet, Clock, CheckCircle2 } from "lucide-react";
-
-const stats = [
-    {
-        title: "Total Processed",
-        amount: "$2,480.00",
-        trend: "+ 2.5% vs last week",
-        trendUp: true,
-        icon: Wallet,
-    },
-    {
-        title: "Pending transfers",
-        amount: "$320.00",
-        subtitle: "2 transactions",
-        icon: Clock,
-    },
-    {
-        title: "Total received",
-        amount: "$1,240.00",
-        trend: "+ 11.2% vs last month",
-        trendUp: true,
-        icon: CheckCircle2,
-    },
-];
+import { useCurrency } from "@/features/currency/CurrencyContext";
 
 export function StatCards() {
+    const { formatAmount } = useCurrency();
+
+    const stats = [
+        {
+            title: "Total Processed",
+            amount: formatAmount(3750000),
+            trend: "+ 2.5% vs last week",
+            trendUp: true,
+            icon: Wallet,
+        },
+        {
+            title: "Pending transfers",
+            amount: formatAmount(485000),
+            subtitle: "2 transactions",
+            icon: Clock,
+        },
+        {
+            title: "Total received",
+            amount: formatAmount(1880000),
+            trend: "+ 11.2% vs last month",
+            trendUp: true,
+            icon: CheckCircle2,
+        },
+    ];
+
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             {stats.map((stat, index) => (

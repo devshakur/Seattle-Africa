@@ -22,7 +22,7 @@ export interface TrackedTransaction {
 const mockData: Record<string, TrackedTransaction> = {
     "SET-89210": {
         id: "SET-89210",
-        amount: "$500.00",
+        amount: "₦ 760,000.00",
         recipient: "Amina Yusuf",
         bank: "Guaranty Trust Bank (GTB)",
         date: "Oct 24, 2025 • 10:30 AM",
@@ -36,7 +36,7 @@ const mockData: Record<string, TrackedTransaction> = {
     },
     "SET-89211": {
         id: "SET-89211",
-        amount: "$250.00",
+        amount: "₦ 380,000.00",
         recipient: "John Doe",
         bank: "Access Bank",
         date: "Oct 25, 2025 • 02:15 PM",
@@ -61,19 +61,17 @@ export function useTrackTransaction() {
 
         setStatus("loading");
         setError("");
-        setTransaction(null);
 
-        // Simulate API call
         setTimeout(() => {
-            const result = mockData[query.toUpperCase()];
+            const result = mockData[query.trim().toUpperCase()];
             if (result) {
                 setTransaction(result);
                 setStatus("success");
             } else {
-                setError("Transaction not found. Please check the ID and try again.");
+                setError("Transaction ID not found. Try searching for SET-89210 or SET-89211.");
                 setStatus("error");
             }
-        }, 1500);
+        }, 1200);
     };
 
     const resetSearch = () => {
@@ -85,10 +83,10 @@ export function useTrackTransaction() {
 
     return {
         query,
-        setQuery,
         status,
         transaction,
         error,
+        setQuery,
         searchTransaction,
         resetSearch,
     };

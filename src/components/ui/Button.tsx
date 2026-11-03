@@ -1,4 +1,3 @@
-
 "use client";
 
 import {
@@ -10,8 +9,8 @@ import { useRouter } from "next/navigation";
 import { LoaderCircle } from "lucide-react";
 import { cn } from "@/libs/utils";
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-    variant?: "primary" | "outline" | "ghost";
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+    variant?: "primary" | "outline" | "ghost" | "secondary";
     size?: "default" | "sm" | "lg";
     href?: string;
     loading?: boolean;
@@ -36,9 +35,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref
     ) => {
         const router = useRouter();
-        const [isLoading, setIsLoading] = useState(false);
+        const [internalLoading, setInternalLoading] = useState(false);
 
-        const busy = loading || isLoading;
+        const busy = loading || internalLoading;
         const isDisabled = disabled || busy;
 
         const handleClick: ButtonHTMLAttributes<HTMLButtonElement>["onClick"] =
@@ -55,7 +54,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
                 if (event.defaultPrevented) return;
 
                 if (href) {
-                    setIsLoading(true);
+                    setInternalLoading(true);
                     router.push(href);
                 }
             };
@@ -68,15 +67,17 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
                 aria-busy={busy}
                 onClick={handleClick}
                 className={cn(
-                    "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 disabled:pointer-events-none disabled:opacity-50",
+                    "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black disabled:pointer-events-none disabled:opacity-50 select-none",
                     {
-                        "bg-black text-white hover:bg-gray-800":
+                        "bg-black text-white hover:bg-zinc-850 active:bg-zinc-900 border border-black":
                             variant === "primary",
-                        "border border-gray-300 bg-transparent text-gray-900 hover:bg-gray-50":
+                        "border border-[#E5E5E5] bg-white text-black hover:bg-zinc-100":
                             variant === "outline",
-                        "text-gray-700 hover:bg-gray-100":
+                        "bg-zinc-100 text-black hover:bg-zinc-200 border border-transparent":
+                            variant === "secondary",
+                        "text-zinc-700 hover:text-black hover:bg-zinc-100":
                             variant === "ghost",
-                        "h-10 px-4 py-2 text-sm":
+                        "h-11 px-4 py-2.5 text-sm":
                             size === "default",
                         "h-9 rounded-md px-3 text-xs":
                             size === "sm",
@@ -90,7 +91,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
                 {busy && (
                     <LoaderCircle
                         size={16}
-                        className="shrink-0 animate-spin"
+                        className="shrink-0 animate-spin text-current"
                         aria-hidden="true"
                     />
                 )}

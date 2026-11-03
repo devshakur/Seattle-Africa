@@ -48,6 +48,39 @@ body {
   animation: bubble-enter 1.4s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+.font-tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Hide scrollbars across all browsers */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@keyframes ticker-slide {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-ticker {
+  display: flex;
+  width: max-content;
+  animation: ticker-slide 30s linear infinite;
+}
+
+.animate-ticker:hover {
+  animation-play-state: paused;
+}
+
 :root {
   --ink: #0b0b0c;
   --muted: #626268;

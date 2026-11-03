@@ -1,21 +1,18 @@
 "use client";
 
-import Link from "next/link"
+import Link from "next/link";
 import Image from "next/image";
-
 import { usePathname } from "next/navigation";
 import {
     LayoutDashboard,
     Send,
-    Download,
     ArrowLeftRight,
-    Wallet,
     Settings,
     HelpCircle,
     LogOut,
     ChevronDown,
     X,
-    Search
+    Search,
 } from "lucide-react";
 import { cn } from "@/libs/utils";
 
@@ -50,8 +47,6 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             <aside
                 className={cn(
                     "w-[260px] h-screen bg-white border-r border-gray-100 flex flex-col fixed left-0 top-0 z-50 overflow-y-auto transition-transform duration-300 ease-in-out",
-                    // Slide in on mobile if isOpen, otherwise slide out (-translate-x-full).
-                    // On large screens (lg), keep it static and visible.
                     isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
                 )}
             >
@@ -63,7 +58,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     </Link>
 
                     {/* Close button visible only on mobile */}
-                    <button onClick={onClose} className="lg:hidden p-2 text-gray-500 hover:text-black hover:bg-gray-100 rounded-lg">
+                    <button onClick={onClose} className="lg:hidden p-2 text-gray-500 hover:text-black hover:bg-gray-100 rounded-lg" aria-label="Close sidebar">
                         <X size={20} />
                     </button>
                 </div>
@@ -73,7 +68,14 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     <div className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-gray-200 border border-gray-300 flex items-center justify-center overflow-hidden">
-                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Amina" alt="User" className="w-full h-full object-cover" />
+                                <Image
+                                    src="https://api.dicebear.com/7.x/avataaars/svg?seed=Amina"
+                                    alt="User avatar"
+                                    width={40}
+                                    height={40}
+                                    unoptimized
+                                    className="w-full h-full object-cover"
+                                />
                             </div>
                             <div>
                                 <p className="text-sm font-semibold text-gray-900">Abdulshakur Dauda</p>
@@ -92,7 +94,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                             <Link
                                 key={item.name}
                                 href={item.href}
-                                onClick={onClose} // Close menu when link is clicked
+                                onClick={onClose}
                                 className={cn(
                                     "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
                                     isActive

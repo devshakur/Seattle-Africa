@@ -1,23 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
     ArrowRight,
     ArrowLeft,
-    Loader2,
-    CheckCircle2,
-    Building2,
     Globe2,
-    AlertCircle,
     ChevronDown,
-    ShieldCheck,
     Zap,
     Clock,
     Landmark,
     LockKeyhole,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { cn } from "@/libs/utils";
 
 interface Props {
     amount: string;
@@ -37,32 +31,54 @@ interface Props {
 }
 
 const sendCurrencies = [
-    { code: "USD", symbol: "$", name: "US Dollar" },
-    { code: "GBP", symbol: "£", name: "British Pound" },
-    { code: "EUR", symbol: "€", name: "Euro" },
-    { code: "CAD", symbol: "C$", name: "Canadian Dollar" },
+    { code: "NGN", symbol: "₦", name: "Nigerian Naira" },
+    { code: "ZAR", symbol: "R", name: "South African Rand" },
+    { code: "KES", symbol: "KSh", name: "Kenyan Shilling" },
+    { code: "GHS", symbol: "GH₵", name: "Ghanaian Cedi" },
+    { code: "XOF", symbol: "CFA", name: "West African CFA" },
+    { code: "EGP", symbol: "E£", name: "Egyptian Pound" },
+    { code: "RWF", symbol: "FRw", name: "Rwandan Franc" },
+    { code: "UGX", symbol: "USh", name: "Ugandan Shilling" },
 ];
 
-// Mock rates relative to 1 USD
-const usdRates: Record<string, number> = {
-    USD: 1,
-    GBP: 1.27,
-    EUR: 1.08,
-    CAD: 0.74,
+// Baseline relative exchange rates to NGN
+const africanRatesToNgn: Record<string, number> = {
+    NGN: 1,
+    ZAR: 91.38,
+    KES: 11.74,
+    GHS: 97.46,
+    XOF: 2.59,
+    EGP: 31.15,
+    RWF: 1.14,
+    UGX: 0.41,
 };
 
 const countries = [
-    { code: "NG", name: "Nigeria", currency: "NGN", symbol: "₦", flag: "🇳🇬", rateToUsd: 1450 },
-    { code: "GH", name: "Ghana", currency: "GHS", symbol: "₵", flag: "🇬🇭", rateToUsd: 15.2 },
-    { code: "KE", name: "Kenya", currency: "KES", symbol: "KSh", flag: "🇰🇪", rateToUsd: 130.5 },
+    { code: "NG", name: "Nigeria", currency: "NGN", symbol: "₦", flag: "🇳🇬" },
+    { code: "ZA", name: "South Africa", currency: "ZAR", symbol: "R", flag: "🇿🇦" },
+    { code: "KE", name: "Kenya", currency: "KES", symbol: "KSh", flag: "🇰🇪" },
+    { code: "GH", name: "Ghana", currency: "GHS", symbol: "GH₵", flag: "🇬🇭" },
+    { code: "SN", name: "Senegal", currency: "XOF", symbol: "CFA", flag: "🇸🇳" },
+    { code: "EG", name: "Egypt", currency: "EGP", symbol: "E£", flag: "🇪🇬" },
+    { code: "RW", name: "Rwanda", currency: "RWF", symbol: "FRw", flag: "🇷🇼" },
+    { code: "UG", name: "Uganda", currency: "UGX", symbol: "USh", flag: "🇺🇬" },
 ];
 
 const banks = [
     { id: "gtb", name: "Guaranty Trust Bank (GTB)", country: "NG" },
     { id: "access", name: "Access Bank", country: "NG" },
     { id: "zenith", name: "Zenith Bank", country: "NG" },
+    { id: "standard-za", name: "Standard Bank", country: "ZA" },
+    { id: "fnb-za", name: "First National Bank (FNB)", country: "ZA" },
+    { id: "capitec", name: "Capitec Bank", country: "ZA" },
+    { id: "kcb", name: "KCB Bank Kenya", country: "KE" },
+    { id: "equity", name: "Equity Bank", country: "KE" },
     { id: "gcb", name: "GCB Bank", country: "GH" },
-    { id: "kcb", name: "KCB Bank", country: "KE" },
+    { id: "ecobank-gh", name: "Ecobank Ghana", country: "GH" },
+    { id: "cbao", name: "CBAO Groupe Attijariwafa", country: "SN" },
+    { id: "cib-eg", name: "Commercial International Bank (CIB)", country: "EG" },
+    { id: "bk-rw", name: "Bank of Kigali", country: "RW" },
+    { id: "stanbic-ug", name: "Stanbic Bank Uganda", country: "UG" },
 ];
 
 export function StepTransferDetails({
@@ -84,58 +100,56 @@ export function StepTransferDetails({
     const [isFetchingAccount, setIsFetchingAccount] = useState(false);
     const [fetchError, setFetchError] = useState("");
 
-    // Reset bank and account details when country changes
-    useEffect(() => {
-        setBankName("");
-        setAccountNumber("");
-        setAccountName("");
-        setFetchError("");
-    }, [country, setBankName, setAccountNumber, setAccountName]);
-
-    // Simulated Account Lookup API
-    useEffect(() => {
-        if (accountNumber.length >= 10 && bankName) {
+    const triggerLookup = (accNum: string, bank: string) => {
+        if (accNum.length >= 10 && bank) {
             setIsFetchingAccount(true);
             setFetchError("");
             setAccountName("");
 
-            const timer = setTimeout(() => {
-                if (accountNumber === "0000000000") {
+            setTimeout(() => {
+                if (accNum === "0000000000") {
                     setFetchError("Account not found. Please verify the account number.");
-                    setIsFetchingAccount(false);
-                    return;
+                } else {
+                    const mockNames = ["Amina Yusuf", "John Doe", "Chinedu Okafor", "Fatima Diallo", "Sipho Khumalo", "Kwame Asante"];
+                    setAccountName(mockNames[Math.floor(Math.random() * mockNames.length)]);
                 }
-
-                const mockNames = ["Amina Yusuf", "John Doe", "Chinedu Okafor", "Fatima Diallo"];
-                const randomName = mockNames[Math.floor(Math.random() * mockNames.length)];
-
-                setAccountName(randomName);
                 setIsFetchingAccount(false);
-            }, 1400);
-
-            return () => clearTimeout(timer);
+            }, 1000);
         } else {
             setAccountName("");
+            setFetchError("");
         }
-    }, [accountNumber, bankName, setAccountName]);
+    };
+
+    const handleCountryChange = (newCountry: string) => {
+        setCountry(newCountry);
+        setBankName("");
+        setAccountNumber("");
+        setAccountName("");
+        setFetchError("");
+    };
+
+    const handleBankChange = (newBank: string) => {
+        setBankName(newBank);
+        triggerLookup(accountNumber, newBank);
+    };
+
+    const handleAccountNumberChange = (val: string) => {
+        const clean = val.replace(/\D/g, "");
+        setAccountNumber(clean);
+        triggerLookup(clean, bankName);
+    };
 
     const selectedCountry = countries.find((c) => c.name === country);
     const availableBanks = banks.filter((b) => b.country === selectedCountry?.code);
 
     const numAmount = parseFloat(amount) || 0;
-    const fee = numAmount > 0 ? (sendCurrency === "USD" ? 2.0 : 2.0 / usdRates[sendCurrency]) : 0; // Simple fee conversion
+    const fromRate = africanRatesToNgn[sendCurrency] || 1;
+    const toRate = selectedCountry ? africanRatesToNgn[selectedCountry.currency] || 1 : 1;
+    const displayRate = fromRate / toRate;
+    const convertedAmount = numAmount * displayRate;
 
-    // Calculate Cross-Rate (e.g., GBP to NGN)
-    let displayRate = 0;
-    let convertedAmount = 0;
-
-    if (selectedCountry && sendCurrency) {
-        // Rate: 1 GBP = X NGN
-        displayRate = selectedCountry.rateToUsd / usdRates[sendCurrency];
-        convertedAmount = numAmount * displayRate;
-    }
-
-    const currentSymbol = sendCurrencies.find((c) => c.code === sendCurrency)?.symbol || "$";
+    const currentSymbol = sendCurrencies.find((c) => c.code === sendCurrency)?.symbol || "₦";
 
     const isFormValid =
         numAmount > 0 &&
@@ -153,7 +167,7 @@ export function StepTransferDetails({
             <div className="mb-8">
                 <div className="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-800 mb-3">
                     <Globe2 size={13} />
-                    <span>International Transfer</span>
+                    <span>Pan-African Settlement</span>
                 </div>
                 <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
                     Transfer Details
@@ -207,7 +221,7 @@ export function StepTransferDetails({
                         {numAmount > 0 && selectedCountry && (
                             <div className="flex items-center justify-between px-1 text-xs text-gray-500 pt-1">
                                 <span className="flex items-center gap-1 text-gray-900 font-medium">
-                                    <Zap size={13} /> Guaranteed rate: 1 {sendCurrency} = {displayRate.toFixed(2)} {selectedCountry.currency}
+                                    <Zap size={13} /> Guaranteed rate: 1 {sendCurrency} = {displayRate.toFixed(4)} {selectedCountry.currency}
                                 </span>
                                 <span className="font-semibold text-gray-900">
                                     Recipient gets ~ {selectedCountry.symbol} {convertedAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -228,7 +242,7 @@ export function StepTransferDetails({
                             <div className="relative">
                                 <select
                                     value={country}
-                                    onChange={(e) => setCountry(e.target.value)}
+                                    onChange={(e) => handleCountryChange(e.target.value)}
                                     className="h-11 w-full appearance-none rounded-xl border border-gray-200 bg-white pl-10 pr-9 text-sm font-medium text-gray-900 transition-all focus:border-black focus:outline-none focus:ring-4 focus:ring-black/5 hover:border-gray-300 cursor-pointer"
                                 >
                                     <option value="" disabled>
@@ -248,17 +262,17 @@ export function StepTransferDetails({
                         {/* Bank Name */}
                         <div className="space-y-1.5">
                             <label className="text-xs font-semibold uppercase tracking-wider text-gray-500">
-                                Bank Name
+                                Recipient Bank
                             </label>
                             <div className="relative">
                                 <select
                                     value={bankName}
-                                    onChange={(e) => setBankName(e.target.value)}
+                                    onChange={(e) => handleBankChange(e.target.value)}
                                     disabled={!country}
-                                    className="h-11 w-full appearance-none rounded-xl border border-gray-200 bg-white pl-10 pr-9 text-sm font-medium text-gray-900 transition-all focus:border-black focus:outline-none focus:ring-4 focus:ring-black/5 hover:border-gray-300 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400 cursor-pointer"
+                                    className="h-11 w-full appearance-none rounded-xl border border-gray-200 bg-white pl-10 pr-9 text-sm font-medium text-gray-900 transition-all focus:border-black focus:outline-none focus:ring-4 focus:ring-black/5 hover:border-gray-300 disabled:bg-gray-50 disabled:text-gray-400 cursor-pointer"
                                 >
                                     <option value="" disabled>
-                                        Select bank
+                                        {country ? "Select a bank" : "Choose country first"}
                                     </option>
                                     {availableBanks.map((b) => (
                                         <option key={b.id} value={b.name}>
@@ -266,105 +280,73 @@ export function StepTransferDetails({
                                         </option>
                                     ))}
                                 </select>
-                                <Building2 size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                <Landmark size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                                 <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                             </div>
                         </div>
                     </div>
 
-                    {/* Account Number Section */}
-                    <div className="space-y-1.5">
-                        <label className="text-xs font-semibold uppercase tracking-wider text-gray-500">
-                            Account Number
-                        </label>
-                        <div className="relative">
-                            <input
-                                type="text"
-                                value={accountNumber}
-                                onChange={(e) => setAccountNumber(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                                placeholder="e.g. 0123456789"
-                                disabled={!bankName}
-                                className={cn(
-                                    "h-11 w-full rounded-xl border bg-white px-4 text-sm font-medium text-gray-900 transition-all focus:outline-none focus:ring-4 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400",
-                                    fetchError
-                                        ? "border-red-300 focus:border-red-600 focus:ring-red-600/10"
-                                        : accountName
-                                            ? "border-gray-900 focus:border-black focus:ring-black/10"
-                                            : "border-gray-200 focus:border-black focus:ring-black/5 hover:border-gray-300"
-                                )}
-                            />
-                            {isFetchingAccount && (
-                                <div className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                                    <Loader2 size={16} className="animate-spin text-gray-900" />
-                                </div>
+                    {/* Account Number & Auto-Verified Name */}
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        {/* Account Number */}
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                                Account Number
+                            </label>
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    maxLength={12}
+                                    value={accountNumber}
+                                    onChange={(e) => handleAccountNumberChange(e.target.value)}
+                                    placeholder="e.g. 0123456789"
+                                    disabled={!bankName}
+                                    className="h-11 w-full rounded-xl border border-gray-200 bg-white px-4 text-sm font-medium text-gray-900 transition-all focus:border-black focus:outline-none focus:ring-4 focus:ring-black/5 hover:border-gray-300 disabled:bg-gray-50 disabled:text-gray-400"
+                                />
+                            </div>
+                            {fetchError && (
+                                <p className="text-xs text-red-500 font-medium pt-1">
+                                    {fetchError}
+                                </p>
                             )}
                         </div>
 
-                        {/* Verification Feedback States */}
-                        {isFetchingAccount && (
-                            <p className="mt-1.5 text-xs text-gray-500 flex items-center gap-1.5 animate-pulse">
-                                Verifying account information...
-                            </p>
-                        )}
-
-                        {fetchError && (
-                            <div className="mt-2 flex items-start gap-2 rounded-lg bg-red-50/80 p-3 border border-red-100 text-red-700">
-                                <AlertCircle size={16} className="shrink-0 mt-0.5" />
-                                <span className="text-xs font-medium leading-relaxed">{fetchError}</span>
+                        {/* Account Name (Verified Automatically) */}
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                                Account Name
+                            </label>
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    value={isFetchingAccount ? "Verifying bank details..." : accountName}
+                                    readOnly
+                                    placeholder="Auto-verifies upon number entry"
+                                    className="h-11 w-full rounded-xl border border-gray-200 bg-gray-50/70 px-4 text-sm font-medium text-gray-900 focus:outline-none cursor-default"
+                                />
                             </div>
-                        )}
-
-                        {accountName && !isFetchingAccount && (
-                            <div className="mt-2 flex items-center gap-2.5 rounded-lg bg-gray-50 p-3 border border-gray-200 text-gray-900">
-                                <CheckCircle2 size={18} className="text-black shrink-0" />
-                                <div>
-                                    <p className="text-xs text-gray-500">Account Verified</p>
-                                    <p className="text-sm font-semibold">{accountName}</p>
-                                </div>
-                            </div>
-                        )}
+                        </div>
                     </div>
 
-                    {/* Fee & Payment Summary Card */}
-                    {numAmount > 0 && (
-                        <div className="rounded-xl border border-gray-100 bg-gray-50/70 p-4 space-y-2.5 text-xs">
-                            <div className="flex justify-between text-gray-600">
-                                <span>Transfer amount</span>
-                                <span className="font-semibold text-gray-900">{currentSymbol}{numAmount.toFixed(2)}</span>
-                            </div>
-                            <div className="flex justify-between text-gray-600">
-                                <span>Transfer fee</span>
-                                <span className="font-semibold text-gray-900">{currentSymbol}{fee.toFixed(2)}</span>
-                            </div>
-                            <div className="h-px w-full bg-gray-200/70 my-1" />
-                            <div className="flex justify-between text-sm font-bold text-gray-900 pt-0.5">
-                                <span>Total cost</span>
-                                <span className="text-black">{currentSymbol}{(numAmount + fee).toFixed(2)} {sendCurrency}</span>
-                            </div>
-                        </div>
-                    )}
+                    {/* Action Controls */}
+                    <div className="pt-4 flex items-center justify-between border-t border-gray-100">
+                        <Button
+                            variant="outline"
+                            onClick={onBack}
+                            className="h-11 rounded-xl px-5 text-sm font-semibold text-gray-700 hover:bg-gray-100 border-gray-200"
+                        >
+                            <ArrowLeft size={16} className="mr-1.5" />
+                            Back
+                        </Button>
 
-                    {/* Action Buttons inside the Card */}
-                    <div className="pt-2">
-                        <div className="flex items-center justify-between gap-3">
-                            <Button
-                                variant="outline"
-                                onClick={onBack}
-                                className="h-11 rounded-xl px-5 text-sm font-semibold text-gray-700 hover:bg-gray-100 border-gray-200"
-                            >
-                                <ArrowLeft size={16} className="mr-1.5" />
-                                Back
-                            </Button>
-
-                            <Button
-                                onClick={onNext}
-                                disabled={!isFormValid}
-                                className="h-11 rounded-xl px-6 text-sm font-semibold bg-black text-white hover:bg-gray-800 disabled:bg-gray-200 disabled:text-gray-400 transition-all shadow-sm"
-                            >
-                                Review Transfer
-                                <ArrowRight size={16} className="ml-1.5" />
-                            </Button>
-                        </div>
+                        <Button
+                            onClick={onNext}
+                            disabled={!isFormValid}
+                            className="h-11 rounded-xl px-6 text-sm font-semibold bg-black text-white hover:bg-gray-800 disabled:bg-gray-200 disabled:text-gray-400 transition-all shadow-sm"
+                        >
+                            Review Transfer
+                            <ArrowRight size={16} className="ml-1.5" />
+                        </Button>
                     </div>
                 </div>
 
@@ -382,7 +364,7 @@ export function StepTransferDetails({
                                 <div>
                                     <p className="text-xs font-semibold text-gray-900">Locked Exchange Rate</p>
                                     <p className="text-[11px] text-gray-500 mt-1 leading-relaxed">
-                                        The rate is locked for 30 minutes. {selectedCountry ? `1 ${sendCurrency} = ${displayRate.toFixed(2)} ${selectedCountry.currency}` : "Select a country to see the rate."}
+                                        The rate is locked for 30 minutes. {selectedCountry ? `1 ${sendCurrency} = ${displayRate.toFixed(4)} ${selectedCountry.currency}` : "Select a country to see the rate."}
                                     </p>
                                 </div>
                             </div>
@@ -395,7 +377,7 @@ export function StepTransferDetails({
                                 <div>
                                     <p className="text-xs font-semibold text-gray-900">Estimated Delivery</p>
                                     <p className="text-[11px] text-gray-500 mt-1 leading-relaxed">
-                                        Funds typically arrive within 5-10 minutes after payment is confirmed.
+                                        Funds typically arrive within seconds via direct Pan-African interbank settlement.
                                     </p>
                                 </div>
                             </div>
@@ -406,9 +388,9 @@ export function StepTransferDetails({
                                     <Zap size={14} className="text-gray-600" />
                                 </div>
                                 <div>
-                                    <p className="text-xs font-semibold text-gray-900">Transfer Limits</p>
+                                    <p className="text-xs font-semibold text-gray-900">Corridor Settlement</p>
                                     <p className="text-[11px] text-gray-500 mt-1 leading-relaxed">
-                                        Daily limit: 10,000 {sendCurrency}. Monthly limit: 50,000 {sendCurrency}.
+                                        Zero currency intermediary route. Direct local central bank clearing.
                                     </p>
                                 </div>
                             </div>
@@ -421,7 +403,7 @@ export function StepTransferDetails({
                         <div>
                             <p className="text-xs font-semibold text-gray-900">Bank-grade Security</p>
                             <p className="text-[11px] text-gray-500 mt-1 leading-relaxed">
-                                Your data is protected with 256-bit encryption. We never store your banking passwords.
+                                Compliant with African central bank regulatory standards and end-to-end encryption.
                             </p>
                         </div>
                     </div>
