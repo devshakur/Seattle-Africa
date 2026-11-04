@@ -130,6 +130,96 @@ export interface BatchRowItem {
     errors: string[];
 }
 
+export type CorporateNotificationCategory = "all" | "transfers" | "approvals" | "security";
+
+export interface CorporateNotificationItem {
+    id: string;
+    category: "transfers" | "approvals" | "security";
+    title: string;
+    description: string;
+    timestamp: string;
+    date: string;
+    read: boolean;
+    reference?: string;
+    amountUsd?: number;
+    amountLocal?: string;
+    beneficiaryName?: string;
+    actionLabel?: string;
+    actionHref?: string;
+}
+
+export const INITIAL_CORPORATE_NOTIFICATIONS: CorporateNotificationItem[] = [
+    {
+        id: "c-notif-1",
+        category: "approvals",
+        title: "Transfer Awaiting Approval",
+        description: "Q4 East Africa Field Payroll Batch ($48,500.00) requires checker approval.",
+        timestamp: "12m ago",
+        date: "Today • 14:22 WAT",
+        read: false,
+        reference: "SET-BIZ-90841",
+        amountUsd: 48500,
+        amountLocal: "KSh 6,278,325.00",
+        beneficiaryName: "Q4 East Africa Field Payroll Batch",
+        actionLabel: "Review in Dashboard",
+        actionHref: "/business/dashboard",
+    },
+    {
+        id: "c-notif-2",
+        category: "transfers",
+        title: "Direct RTGS Clearing",
+        description: "Dangote Port Logistics payment of $82,400.00 is in clearing stage 2.",
+        timestamp: "2h ago",
+        date: "Today • 11:48 WAT",
+        read: false,
+        reference: "SET-BIZ-90839",
+        amountUsd: 82400,
+        amountLocal: "₦ 131,180,800.00",
+        beneficiaryName: "Dangote Port Logistics & Freight Ltd",
+        actionLabel: "View in Transactions",
+        actionHref: "/business/transactions",
+    },
+    {
+        id: "c-notif-3",
+        category: "transfers",
+        title: "Disbursement Completed",
+        description: "Accra Cloud Infrastructure payment of $15,750.00 cleared via Ecobank.",
+        timestamp: "5h ago",
+        date: "Today • 09:15 WAT",
+        read: true,
+        reference: "SET-BIZ-90835",
+        amountUsd: 15750,
+        amountLocal: "GH₵ 249,637.50",
+        beneficiaryName: "Accra Cloud Infrastructure Systems",
+        actionLabel: "View Receipt",
+        actionHref: "/business/transactions",
+    },
+    {
+        id: "c-notif-4",
+        category: "security",
+        title: "Team Invite Accepted",
+        description: "Chidi Okafor joined as Approver/Checker with $50k authorization limit.",
+        timestamp: "1d ago",
+        date: "Nov 02, 2026 • 16:30",
+        read: true,
+        reference: "SEC-TEAM-441",
+        actionLabel: "Manage Team",
+        actionHref: "/business/settings/team",
+    },
+    {
+        id: "c-notif-5",
+        category: "security",
+        title: "Monthly Volume Alert",
+        description: "Company utilized 28.8% ($288,710.00) of tier compliance limit.",
+        timestamp: "2d ago",
+        date: "Nov 01, 2026 • 09:00",
+        read: true,
+        reference: "COMP-TIER-102",
+        actionLabel: "View Limits",
+        actionHref: "/business/dashboard",
+    },
+];
+
 export const INITIAL_FUNDING_SOURCES: CorporateFundingSource[] = [
     {
         id: "fs-stanbic-ng",
@@ -825,6 +915,10 @@ interface BusinessContextValue {
     fundingSources: CorporateFundingSource[];
     teamMembers: TeamMember[];
     beneficiaries: CorporateBeneficiary[];
+    notifications: CorporateNotificationItem[];
+    unreadNotificationsCount: number;
+    markNotificationAsRead: (id: string) => void;
+    markAllNotificationsAsRead: () => void;
     initiateAccountSwitch: (targetMode: AccountMode) => void;
     addSingleTransfer: (item: Omit<CorporateTransferItem, "id" | "reference" | "timestamp" | "createdAtIso">) => CorporateTransferItem;
     approveTransfer: (id: string) => void;
@@ -855,6 +949,20 @@ export function BusinessProvider({ children }: { children: ReactNode }) {
     const [fundingSources] = useState<CorporateFundingSource[]>(INITIAL_FUNDING_SOURCES);
     const [teamMembers, setTeamMembers] = useState<TeamMember[]>(INITIAL_TEAM_MEMBERS);
     const [beneficiaries, setBeneficiaries] = useState<CorporateBeneficiary[]>(INITIAL_BENEFICIARIES);
+    const [notifications, setNotifications] = useState<CorporateNotificationItem[]>(INITIAL_CORPORATE_NOTIFICATIONS);
+
+    const unreadNotificationsCount = notifications.filter((n) => !n.read).length;
+
+    const markNotificationAsRead = (id: string) => {
+        setNotifications((prev) =>
+            prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+        );
+    };
+
+    const markAllNotificationsAsRead = () => {
+        setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+        toast.success("All notifications marked as read.");
+    };
 
     useEffect(() => {
         try {
@@ -1040,6 +1148,10 @@ export function BusinessProvider({ children }: { children: ReactNode }) {
                 fundingSources,
                 teamMembers,
                 beneficiaries,
+                notifications,
+                unreadNotificationsCount,
+                markNotificationAsRead,
+                markAllNotificationsAsRead,
                 initiateAccountSwitch,
                 addSingleTransfer,
                 approveTransfer,
