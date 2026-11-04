@@ -74,10 +74,10 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     >
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-black text-white font-mono font-bold text-sm flex items-center justify-center border border-zinc-800 shadow-xs select-none shrink-0">
-                                AY
+                                AD
                             </div>
                             <div>
-                                <p className="text-sm font-semibold text-gray-900">Amina Yusuf</p>
+                                <p className="text-sm font-semibold text-gray-900">Abdulshakur Dauda</p>
                                 <p className="text-xs text-gray-500">Personal Account</p>
                             </div>
                         </div>
@@ -123,3 +123,5 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         </>
     );
 }
+
+export default Sidebar;

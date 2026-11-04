@@ -18,7 +18,7 @@ const TABS: { id: SettingsTab; label: string; icon: React.ComponentType<{ size?:
 export function SettingsPage() {
     const settings = useSettings();
 
-    // Default user initials: "AY" (Amina Yusuf)
+    // Default user initials: "AD" (Abdulshakur Dauda)
     const userInitials = "AD";
 
     return (

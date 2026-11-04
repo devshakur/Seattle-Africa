@@ -23,7 +23,7 @@ const mockData: Record<string, TrackedTransaction> = {
     "SET-89210": {
         id: "SET-89210",
         amount: "₦ 760,000.00",
-        recipient: "Amina Yusuf",
+        recipient: "Abdulshakur Dauda",
         bank: "Guaranty Trust Bank (GTB)",
         date: "Oct 24, 2025 • 10:30 AM",
         status: "Completed",

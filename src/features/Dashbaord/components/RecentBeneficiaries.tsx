@@ -11,7 +11,7 @@ const STORAGE_KEY = "settle_africa_beneficiaries";
 
 const DEFAULT_BENEFICIARIES: Beneficiary[] = [
     { id: "b-1", name: "Chioma Adeleke", bank: "GTBank", accountNumber: "0124924921", currency: "NGN" },
-    { id: "b-2", name: "Amina Yusuf", bank: "M-Pesa", accountNumber: "0712348832", currency: "KES" },
+    { id: "b-2", name: "Abdulshakur Dauda", bank: "M-Pesa", accountNumber: "0712348832", currency: "KES" },
     { id: "b-3", name: "David Osei", bank: "GCB Bank", accountNumber: "0241231102", currency: "GHS" },
 ];
 

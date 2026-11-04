@@ -78,7 +78,7 @@ export const INITIAL_NOTIFICATIONS: NotificationItem[] = [
         id: "notif-5",
         category: "transfers",
         title: "M-Pesa Mobile Money Received",
-        description: "Amina Yusuf sent KSh 45,000.00 to your Kenyan shilling digital treasury wallet.",
+        description: "Abdulshakur Dauda sent KSh 45,000.00 to your Kenyan shilling digital treasury wallet.",
         timestamp: "Yesterday • 14:12",
         date: "Nov 02, 2026 • 14:12",
         read: true,
