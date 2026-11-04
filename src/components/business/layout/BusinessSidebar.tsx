@@ -9,7 +9,6 @@ import {
     FileSpreadsheet,
     BookUser,
     Bell,
-    Users,
     ArrowRightLeft,
     LogOut,
     X,
@@ -23,7 +22,6 @@ const navItems = [
     { name: "Bulk Payouts", href: "/business/payouts/batch", icon: FileSpreadsheet },
     { name: "Beneficiaries", href: "/business/beneficiaries", icon: BookUser },
     { name: "Notifications", href: "/business/notifications", icon: Bell },
-    { name: "Team", href: "/business/settings/team", icon: Users },
 ];
 
 interface BusinessSidebarProps {
@@ -137,3 +135,4 @@ export function BusinessSidebar({ isOpen, onClose }: BusinessSidebarProps) {
     );
 }
 
+export default BusinessSidebar;

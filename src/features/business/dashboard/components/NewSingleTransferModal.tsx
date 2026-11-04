@@ -1,19 +1,21 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     X,
     ArrowRight,
+    ArrowLeft,
+    Check,
+    ShieldCheck,
+    Search,
+    Lock,
+    RefreshCw,
     Building2,
     CreditCard,
-    ShieldCheck,
-    Check,
-    AlertCircle,
-    FileText,
+    Smartphone,
+    Landmark,
 } from "lucide-react";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
 import { useBusiness, CorporateBeneficiary } from "@/features/business/context/BusinessContext";
 import { toast } from "react-toastify";
 
@@ -22,6 +24,41 @@ interface NewSingleTransferModalProps {
     onClose: () => void;
     preselectedBeneficiary?: CorporateBeneficiary | null;
 }
+
+type StepIndex = 0 | 1 | 2;
+export type CorporatePaymentMethod = "bank" | "card" | "mobile";
+
+const STEP_LABELS = [
+    { number: 1, label: "Recipient" },
+    { number: 2, label: "Payment Method" },
+    { number: 3, label: "Authorize" },
+];
+
+const PAYMENT_METHODS: {
+    id: CorporatePaymentMethod;
+    label: string;
+    icon: typeof Landmark;
+    note: string;
+}[] = [
+    {
+        id: "bank",
+        label: "Bank Transfer",
+        icon: Landmark,
+        note: "Direct RTGS / NIP",
+    },
+    {
+        id: "card",
+        label: "Debit Card",
+        icon: CreditCard,
+        note: "Commercial Visa/MC",
+    },
+    {
+        id: "mobile",
+        label: "Mobile Money",
+        icon: Smartphone,
+        note: "M-Pesa / MoMo Rail",
+    },
+];
 
 const FX_RATES_BY_CURRENCY: Record<string, number> = {
     NGN: 1592.0,
@@ -34,6 +71,21 @@ const FX_RATES_BY_CURRENCY: Record<string, number> = {
     UGX: 3680.0,
 };
 
+const slideVariants = {
+    enter: (direction: number) => ({
+        x: direction > 0 ? 24 : -24,
+        opacity: 0,
+    }),
+    center: {
+        x: 0,
+        opacity: 1,
+    },
+    exit: (direction: number) => ({
+        x: direction > 0 ? -24 : 24,
+        opacity: 0,
+    }),
+};
+
 export function NewSingleTransferModal({
     isOpen,
     onClose,
@@ -41,20 +93,37 @@ export function NewSingleTransferModal({
 }: NewSingleTransferModalProps) {
     const { beneficiaries, fundingSources, addSingleTransfer } = useBusiness();
 
-    const [selectedBeneficiaryId, setSelectedBeneficiaryId] = useState<string>(
-        preselectedBeneficiary?.id || beneficiaries[0]?.id || ""
-    );
-    const [selectedFundingId, setSelectedFundingId] = useState<string>(
-        fundingSources[0]?.id || ""
-    );
-    const [amountUsdInput, setAmountUsdInput] = useState<string>("12500");
+    const [step, setStep] = useState<StepIndex>(0);
+    const [direction, setDirection] = useState(1);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [selectedBeneficiaryId, setSelectedBeneficiaryId] = useState<string>("");
+    const [paymentMethod, setPaymentMethod] = useState<CorporatePaymentMethod>("bank");
+    const [selectedFundingId, setSelectedFundingId] = useState<string>("");
+    const [amountUsdInput, setAmountUsdInput] = useState<string>("5000");
     const [invoiceRef, setInvoiceRef] = useState<string>("INV-2026-910");
-    const [paymentPurpose, setPaymentPurpose] = useState<string>(
-        "Corporate Supplier Settlement"
-    );
-    const [requireCheckerApproval, setRequireCheckerApproval] = useState<boolean>(false);
-    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-    const [error, setError] = useState<string>("");
+    const [securityCode, setSecurityCode] = useState<string>("");
+    const [confirmedTerms, setConfirmedTerms] = useState<boolean>(false);
+    const [isProcessing, setIsProcessing] = useState<boolean>(false);
+    const [isComplete, setIsComplete] = useState<boolean>(false);
+    const [createdRef, setCreatedRef] = useState<string>("");
+
+    // Initialize or reset selections when modal opens
+    useEffect(() => {
+        if (isOpen) {
+            setStep(0);
+            setDirection(1);
+            setIsProcessing(false);
+            setIsComplete(false);
+            setSecurityCode("");
+            setConfirmedTerms(false);
+            setSearchQuery("");
+            setPaymentMethod("bank");
+            setSelectedBeneficiaryId(
+                preselectedBeneficiary?.id || beneficiaries[0]?.id || ""
+            );
+            setSelectedFundingId(fundingSources[0]?.id || "");
+        }
+    }, [isOpen, preselectedBeneficiary, beneficiaries, fundingSources]);
 
     const activeBeneficiary = useMemo(() => {
         if (preselectedBeneficiary && preselectedBeneficiary.id === selectedBeneficiaryId) {
@@ -67,9 +136,35 @@ export function NewSingleTransferModal({
         );
     }, [beneficiaries, selectedBeneficiaryId, preselectedBeneficiary]);
 
+    // Filter available funding instruments based on selected payment method
+    const matchingFundingSources = useMemo(() => {
+        if (paymentMethod === "card") {
+            const cards = fundingSources.filter((fs) => fs.type === "corporate_card");
+            return cards.length > 0 ? cards : fundingSources;
+        }
+        if (paymentMethod === "bank") {
+            const banks = fundingSources.filter((fs) => fs.type === "corporate_bank");
+            return banks.length > 0 ? banks : fundingSources;
+        }
+        return fundingSources;
+    }, [fundingSources, paymentMethod]);
+
+    // Ensure selectedFundingId matches the current payment method filter
+    useEffect(() => {
+        if (matchingFundingSources.length > 0) {
+            const exists = matchingFundingSources.some((fs) => fs.id === selectedFundingId);
+            if (!exists) {
+                setSelectedFundingId(matchingFundingSources[0].id);
+            }
+        }
+    }, [paymentMethod, matchingFundingSources, selectedFundingId]);
+
     const activeFundingSource = useMemo(
-        () => fundingSources.find((f) => f.id === selectedFundingId) || fundingSources[0],
-        [fundingSources, selectedFundingId]
+        () =>
+            matchingFundingSources.find((f) => f.id === selectedFundingId) ||
+            matchingFundingSources[0] ||
+            fundingSources[0],
+        [matchingFundingSources, selectedFundingId, fundingSources]
     );
 
     const parsedAmountUsd = useMemo(() => {
@@ -80,37 +175,56 @@ export function NewSingleTransferModal({
     const fxRate = activeBeneficiary
         ? FX_RATES_BY_CURRENCY[activeBeneficiary.currencyCode] || 1592.0
         : 1592.0;
+
     const localPayoutAmount = parsedAmountUsd * fxRate;
+    const feeRatePercent =
+        paymentMethod === "card"
+            ? 0.95
+            : paymentMethod === "mobile"
+              ? 0.35
+              : activeFundingSource?.feePercent || 0.15;
+
     const clearingFeeUsd = Number(
-        (parsedAmountUsd * ((activeFundingSource?.feePercent || 0.15) / 100)).toFixed(2)
+        (parsedAmountUsd * (feeRatePercent / 100)).toFixed(2)
     );
     const totalDirectDebitUsd = parsedAmountUsd + clearingFeeUsd;
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!activeBeneficiary) {
-            setError("Please select a verified corporate beneficiary.");
-            return;
-        }
-        if (parsedAmountUsd <= 0) {
-            setError("Please enter a valid pass-through settlement amount greater than $0.00.");
-            return;
-        }
-        if (!invoiceRef.trim()) {
-            setError("Invoice or contract reference is required for audit compliance.");
-            return;
-        }
+    const filteredBeneficiaries = useMemo(() => {
+        if (!searchQuery.trim()) return beneficiaries;
+        const q = searchQuery.toLowerCase();
+        return beneficiaries.filter(
+            (b) =>
+                b.entityName.toLowerCase().includes(q) ||
+                b.institutionName.toLowerCase().includes(q) ||
+                b.country.toLowerCase().includes(q) ||
+                b.currencyCode.toLowerCase().includes(q)
+        );
+    }, [beneficiaries, searchQuery]);
 
-        setError("");
-        setIsSubmitting(true);
-        await new Promise((r) => setTimeout(r, 650));
+    const navigateTo = (next: StepIndex) => {
+        setDirection(next > step ? 1 : -1);
+        setStep(next);
+    };
 
-        const needsApproval = requireCheckerApproval || parsedAmountUsd >= 50000;
+    const handleAuthorize = async () => {
+        if (!activeBeneficiary || parsedAmountUsd <= 0) return;
 
-        addSingleTransfer({
+        setIsProcessing(true);
+        await new Promise((r) => setTimeout(r, 750));
+
+        const needsApproval = parsedAmountUsd >= 50000;
+
+        const methodLabel =
+            paymentMethod === "bank"
+                ? "Direct Corporate Bank RTGS"
+                : paymentMethod === "card"
+                  ? "Corporate Commercial Card Rail"
+                  : "Direct Mobile Money Partner Rail";
+
+        const created = addSingleTransfer({
             type: "single",
             beneficiaryName: activeBeneficiary.entityName,
-            beneficiarySubtext: `${activeBeneficiary.institutionName} • ${activeBeneficiary.accountOrMobileNumber} • ${invoiceRef.trim()}`,
+            beneficiarySubtext: `${activeBeneficiary.institutionName} • ${activeBeneficiary.accountOrMobileNumber} • ${invoiceRef.trim() || "Single Settlement"}`,
             corridorCountry: activeBeneficiary.country,
             corridorFlag: activeBeneficiary.flag,
             currencyCode: activeBeneficiary.currencyCode,
@@ -119,311 +233,573 @@ export function NewSingleTransferModal({
             amountUsd: parsedAmountUsd,
             amountLocal: localPayoutAmount,
             feeUsd: clearingFeeUsd,
-            fundingSourceId: activeFundingSource.id,
-            fundingSourceName: `${activeFundingSource.institutionName} ${activeFundingSource.maskedNumber}`,
-            fundingSourceRail: activeFundingSource.rail,
+            fundingSourceId: activeFundingSource?.id || "direct-rail",
+            fundingSourceName:
+                paymentMethod === "mobile"
+                    ? "Direct Mobile Money Corporate API Rail"
+                    : `${activeFundingSource?.institutionName} ${activeFundingSource?.maskedNumber}`,
+            fundingSourceRail: methodLabel,
             payoutPartnerRail:
-                activeBeneficiary.payoutMethod === "Mobile Money"
-                    ? "Direct Mobile Money Partner API"
-                    : "Direct Local Bank RTGS / NIP",
+                activeBeneficiary.payoutMethod === "Mobile Money" || paymentMethod === "mobile"
+                    ? "Direct Mobile Money Rail (M-Pesa / MoMo)"
+                    : "Direct Local Bank RTGS",
             status: needsApproval ? "pending_approval" : "clearing",
-            initiatedBy: "Amina Yusuf (Admin)",
-            approvedBy: needsApproval ? undefined : "Amina Yusuf (Admin)",
+            initiatedBy: "Finance Maker",
+            approvedBy: needsApproval ? undefined : "Authorized User",
             clearingStage: needsApproval ? 1 : 2,
         });
 
-        setIsSubmitting(false);
+        setIsProcessing(false);
+        setCreatedRef(created.reference);
+        setIsComplete(true);
+
         toast.success(
             needsApproval
-                ? "Corporate transfer staged for Approver/Checker sign-off."
-                : `Direct pass-through of $${parsedAmountUsd.toLocaleString("en-US", { minimumFractionDigits: 2 })} initiated from ${activeFundingSource.institutionName}.`
+                ? "Payment staged for Approver sign-off."
+                : `Transfer of $${parsedAmountUsd.toLocaleString("en-US", { minimumFractionDigits: 2 })} authorized.`
         );
-        onClose();
     };
 
     return (
         <AnimatePresence>
             {isOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    {/* Monochrome Backdrop */}
+                    {/* Backdrop */}
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.18 }}
                         onClick={onClose}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-[1px]"
+                        className="fixed inset-0 bg-black/50 backdrop-blur-[1px]"
                     />
 
                     {/* Modal Window */}
                     <motion.div
-                        initial={{ opacity: 0, y: 14, scale: 0.98 }}
+                        initial={{ opacity: 0, y: 12, scale: 0.98 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 10, scale: 0.98 }}
+                        exit={{ opacity: 0, y: 8, scale: 0.98 }}
                         transition={{ duration: 0.2, ease: "easeOut" }}
-                        className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-black bg-white p-6 sm:p-8 text-black shadow-2xl"
+                        className="relative z-10 w-full max-w-lg rounded-xl border border-[#E5E5E5] bg-white text-black shadow-2xl overflow-hidden"
                     >
-                        {/* Header */}
-                        <div className="flex items-start justify-between gap-4 pb-5 border-b border-[#E5E5E5]">
-                            <div>
-                                <div className="inline-flex items-center gap-1.5 rounded border border-black bg-black text-white px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider mb-2">
-                                    <span>Direct Pass-Through Rail</span>
-                                </div>
-                                <h2 className="text-xl font-bold tracking-tight text-black">
-                                    New Single Corporate Transfer
-                                </h2>
-                                <p className="text-xs text-zinc-500 mt-0.5">
-                                    Funds are debited directly from your linked corporate bank or card and routed immediately to the payout partner.
-                                </p>
+                        {/* Header & Step Tracker */}
+                        <div className="px-6 pt-5 pb-4 border-b border-[#E5E5E5] bg-white">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-base font-semibold tracking-tight text-black">
+                                    New Corporate Transfer
+                                </h3>
+                                <button
+                                    type="button"
+                                    onClick={onClose}
+                                    className="p-1 rounded text-zinc-400 hover:text-black hover:border-black transition-colors cursor-pointer"
+                                    aria-label="Close"
+                                >
+                                    <X size={18} />
+                                </button>
                             </div>
-                            <button
-                                type="button"
-                                onClick={onClose}
-                                className="p-2 rounded-lg border border-[#E5E5E5] text-zinc-500 hover:text-black hover:border-black transition-colors cursor-pointer"
-                                aria-label="Close modal"
-                            >
-                                <X size={18} />
-                            </button>
+
+                            {/* 3-Step Tracker Component with "Payment Method" included */}
+                            <nav aria-label="Transfer steps" className="flex items-center justify-between">
+                                {STEP_LABELS.map((item, index) => {
+                                    const isDone = step > index || isComplete;
+                                    const isActive = step === index && !isComplete;
+
+                                    return (
+                                        <div
+                                            key={item.number}
+                                            className="flex items-center flex-1 last:flex-none"
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <div
+                                                    className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-mono transition-colors ${
+                                                        isDone
+                                                            ? "bg-black text-white"
+                                                            : isActive
+                                                              ? "border border-black text-black font-semibold bg-white"
+                                                              : "border border-[#E5E5E5] text-zinc-400 bg-white"
+                                                    }`}
+                                                >
+                                                    {isDone ? (
+                                                        <Check size={12} strokeWidth={2.5} />
+                                                    ) : (
+                                                        item.number
+                                                    )}
+                                                </div>
+                                                <span
+                                                    className={`text-xs ${
+                                                        isActive || isDone
+                                                            ? "text-black font-medium"
+                                                            : "text-zinc-400"
+                                                    }`}
+                                                >
+                                                    {item.label}
+                                                </span>
+                                            </div>
+
+                                            {index < STEP_LABELS.length - 1 && (
+                                                <div className="flex-1 h-px bg-[#E5E5E5] mx-3 relative overflow-hidden">
+                                                    <motion.div
+                                                        className="absolute inset-y-0 left-0 bg-black"
+                                                        initial={false}
+                                                        animate={{
+                                                            width: step > index || isComplete ? "100%" : "0%",
+                                                        }}
+                                                        transition={{ duration: 0.3 }}
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </nav>
                         </div>
 
-                        <form onSubmit={handleSubmit} className="mt-6 space-y-5 text-left">
-                            {error && (
-                                <div className="rounded-lg border border-black bg-zinc-50 p-3 flex items-center gap-2 text-xs font-mono text-black">
-                                    <AlertCircle size={15} className="shrink-0" />
-                                    <span>{error}</span>
-                                </div>
-                            )}
-
-                            {/* 1. Select Verified Corporate Beneficiary */}
-                            <div className="space-y-1.5">
-                                <label className="text-xs font-bold uppercase tracking-wider font-mono text-black block">
-                                    1. Verified Corporate Beneficiary / Contractor
-                                </label>
-                                <select
-                                    value={activeBeneficiary?.id || ""}
-                                    onChange={(e) => setSelectedBeneficiaryId(e.target.value)}
-                                    className="w-full h-11 rounded-lg border border-[#E5E5E5] bg-white px-3.5 text-sm font-medium text-black focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
+                        {/* Modal Body with Framer Motion slide transitions */}
+                        <div className="p-6 min-h-[420px] max-h-[80vh] overflow-y-auto flex flex-col justify-between">
+                            <AnimatePresence mode="wait" custom={direction} initial={false}>
+                                <motion.div
+                                    key={isComplete ? "complete" : step}
+                                    custom={direction}
+                                    variants={slideVariants}
+                                    initial="enter"
+                                    animate="center"
+                                    exit="exit"
+                                    transition={{ duration: 0.2, ease: "easeOut" }}
+                                    className="space-y-5"
                                 >
-                                    {beneficiaries.map((b) => (
-                                        <option key={b.id} value={b.id}>
-                                            {b.flag} {b.entityName} ({b.currencyCode} • {b.institutionName} • {b.accountOrMobileNumber})
-                                        </option>
-                                    ))}
-                                </select>
-                                {activeBeneficiary && (
-                                    <div className="mt-2 rounded-lg border border-[#E5E5E5] bg-zinc-50 px-3.5 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs">
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-mono font-bold text-black">
-                                                {activeBeneficiary.payoutMethod}:
-                                            </span>
-                                            <span className="text-zinc-600 font-mono font-tabular-nums">
-                                                {activeBeneficiary.institutionName} ({activeBeneficiary.accountOrMobileNumber})
-                                            </span>
-                                        </div>
-                                        <span className="font-mono text-[11px] font-bold border border-black px-2 py-0.5 rounded bg-white text-black font-tabular-nums">
-                                            {activeBeneficiary.taxIdNumber}
-                                        </span>
-                                    </div>
-                                )}
-                            </div>
+                                    {/* ==================== STEP 1: RECIPIENT ==================== */}
+                                    {step === 0 && !isComplete && (
+                                        <div className="space-y-4">
+                                            <div>
+                                                <h4 className="text-sm font-semibold text-black">
+                                                    Select Recipient
+                                                </h4>
+                                                <p className="text-xs text-zinc-500 mt-0.5">
+                                                    Choose a verified corporate beneficiary or contractor.
+                                                </p>
+                                            </div>
 
-                            {/* 2. Source Corporate Funding Instrument */}
-                            <div className="space-y-2">
-                                <label className="text-xs font-bold uppercase tracking-wider font-mono text-black block">
-                                    2. Direct Source Funding Instrument (No Wallet Balance)
-                                </label>
-                                <div className="grid grid-cols-1 gap-2.5">
-                                    {fundingSources.map((fs) => {
-                                        const isSelected = activeFundingSource?.id === fs.id;
-                                        return (
-                                            <button
-                                                key={fs.id}
-                                                type="button"
-                                                onClick={() => setSelectedFundingId(fs.id)}
-                                                className={`w-full flex items-center justify-between p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
-                                                    isSelected
-                                                        ? "border-black bg-black text-white"
-                                                        : "border-[#E5E5E5] bg-white text-black hover:border-black"
-                                                }`}
-                                            >
-                                                <div className="flex items-center gap-3 min-w-0">
-                                                    <div
-                                                        className={`w-9 h-9 rounded-lg flex items-center justify-center border shrink-0 ${
-                                                            isSelected
-                                                                ? "border-white/20 bg-white/10 text-white"
-                                                                : "border-[#E5E5E5] bg-zinc-50 text-black"
-                                                        }`}
-                                                    >
-                                                        {fs.type === "corporate_bank" ? (
-                                                            <Building2 size={16} />
-                                                        ) : (
-                                                            <CreditCard size={16} />
-                                                        )}
-                                                    </div>
-                                                    <div className="min-w-0">
-                                                        <p className="text-xs font-bold truncate">
-                                                            {fs.institutionName}{" "}
-                                                            <span className="font-mono font-tabular-nums">
-                                                                {fs.maskedNumber}
-                                                            </span>
-                                                        </p>
-                                                        <p
-                                                            className={`text-[11px] truncate ${
-                                                                isSelected ? "text-zinc-300" : "text-zinc-500"
+                                            {/* Search input */}
+                                            <div className="relative">
+                                                <Search
+                                                    size={14}
+                                                    className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
+                                                />
+                                                <input
+                                                    type="text"
+                                                    value={searchQuery}
+                                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                                    placeholder="Search recipient or corridor..."
+                                                    className="w-full h-9 pl-9 pr-3 rounded-md border border-[#E5E5E5] text-xs focus:border-black focus:outline-none bg-white text-black"
+                                                />
+                                            </div>
+
+                                            {/* Beneficiary List */}
+                                            <div className="max-h-56 overflow-y-auto space-y-2 border border-[#E5E5E5] rounded-lg p-1 divide-y divide-[#E5E5E5]">
+                                                {filteredBeneficiaries.map((b) => {
+                                                    const isSelected = activeBeneficiary?.id === b.id;
+                                                    return (
+                                                        <button
+                                                            key={b.id}
+                                                            type="button"
+                                                            onClick={() => setSelectedBeneficiaryId(b.id)}
+                                                            className={`w-full p-2.5 rounded text-left transition-colors flex items-center justify-between cursor-pointer ${
+                                                                isSelected
+                                                                    ? "bg-black text-white"
+                                                                    : "bg-white text-black hover:bg-zinc-50"
                                                             }`}
                                                         >
-                                                            {fs.rail} • Fee:{" "}
-                                                            <span className="font-mono font-tabular-nums">
-                                                                {fs.feePercent}%
-                                                            </span>
-                                                        </p>
+                                                            <div className="min-w-0 pr-2">
+                                                                <p className="text-xs font-semibold truncate">
+                                                                    {b.entityName}
+                                                                </p>
+                                                                <p
+                                                                    className={`text-[11px] font-mono mt-0.5 truncate ${
+                                                                        isSelected
+                                                                            ? "text-zinc-300"
+                                                                            : "text-zinc-500"
+                                                                    }`}
+                                                                >
+                                                                    {b.institutionName} • {b.accountOrMobileNumber}
+                                                                </p>
+                                                            </div>
+                                                            <div className="text-right shrink-0">
+                                                                <span
+                                                                    className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
+                                                                        isSelected
+                                                                            ? "border-white/30 text-white"
+                                                                            : "border-[#E5E5E5] text-zinc-600 bg-zinc-50"
+                                                                    }`}
+                                                                >
+                                                                    {b.currencyCode}
+                                                                </span>
+                                                            </div>
+                                                        </button>
+                                                    );
+                                                })}
+
+                                                {filteredBeneficiaries.length === 0 && (
+                                                    <div className="py-6 text-center text-xs text-zinc-400">
+                                                        No verified beneficiaries matching &quot;{searchQuery}&quot;
                                                     </div>
-                                                </div>
-                                                <div className="flex items-center gap-2 shrink-0">
-                                                    <span
-                                                        className={`text-[10px] font-mono font-tabular-nums px-2 py-0.5 rounded border ${
-                                                            isSelected
-                                                                ? "border-white/30 text-white"
-                                                                : "border-[#E5E5E5] text-zinc-600"
-                                                        }`}
-                                                    >
-                                                        Limit ${(fs.dailyLimitUsd / 1000).toFixed(0)}k/d
+                                                )}
+                                            </div>
+
+                                            {/* Action Buttons */}
+                                            <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#E5E5E5]">
+                                                <button
+                                                    type="button"
+                                                    onClick={onClose}
+                                                    className="px-4 h-9 rounded-md border border-[#E5E5E5] text-xs font-medium text-black hover:border-black transition-colors bg-white cursor-pointer"
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => navigateTo(1)}
+                                                    disabled={!activeBeneficiary}
+                                                    className="inline-flex items-center gap-1.5 bg-black text-white px-4 h-9 rounded-md text-xs font-medium hover:bg-zinc-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                                                >
+                                                    <span>Continue</span>
+                                                    <ArrowRight size={13} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* ==================== STEP 2: PAYMENT METHOD & AMOUNT ==================== */}
+                                    {step === 1 && !isComplete && (
+                                        <div className="space-y-4">
+                                            {/* Recipient summary strip */}
+                                            <div className="border border-[#E5E5E5] rounded-md px-3.5 py-2 flex items-center justify-between text-xs bg-zinc-50/50">
+                                                <div>
+                                                    <span className="text-zinc-500">Sending to: </span>
+                                                    <span className="font-semibold text-black">
+                                                        {activeBeneficiary?.entityName}
                                                     </span>
-                                                    {isSelected && <Check size={15} />}
                                                 </div>
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </div>
+                                                <span className="font-mono text-zinc-600">
+                                                    {activeBeneficiary?.currencyCode}
+                                                </span>
+                                            </div>
 
-                            {/* 3. Amount & Invoice Metadata */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <Input
-                                    label="Settlement Principal (USD)"
-                                    type="number"
-                                    step="0.01"
-                                    min="1"
-                                    tabular
-                                    value={amountUsdInput}
-                                    onChange={(e) => setAmountUsdInput(e.target.value)}
-                                    required
-                                />
-                                <Input
-                                    label="Invoice / Contract Reference"
-                                    type="text"
-                                    tabular
-                                    value={invoiceRef}
-                                    onChange={(e) => setInvoiceRef(e.target.value)}
-                                    icon={<FileText size={15} className="text-zinc-400" />}
-                                    required
-                                />
-                            </div>
+                                            {/* Amount Input */}
+                                            <div className="space-y-1.5">
+                                                <label className="text-xs font-semibold text-black block">
+                                                    Settlement Amount (USD)
+                                                </label>
+                                                <div className="relative">
+                                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-zinc-400">
+                                                        $
+                                                    </span>
+                                                    <input
+                                                        type="number"
+                                                        step="0.01"
+                                                        min="1"
+                                                        value={amountUsdInput}
+                                                        onChange={(e) => setAmountUsdInput(e.target.value)}
+                                                        className="w-full h-10 pl-7 pr-3 rounded-md border border-[#E5E5E5] text-base font-mono font-semibold focus:border-black focus:outline-none bg-white text-black"
+                                                        placeholder="0.00"
+                                                    />
+                                                </div>
+                                            </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
-                                <div className="space-y-1.5">
-                                    <label className="text-xs font-semibold text-black tracking-tight block">
-                                        Regulatory Purpose Code
-                                    </label>
-                                    <select
-                                        value={paymentPurpose}
-                                        onChange={(e) => setPaymentPurpose(e.target.value)}
-                                        className="w-full h-11 rounded-lg border border-[#E5E5E5] bg-white px-3 text-xs font-medium text-black focus:border-black focus:outline-none"
-                                    >
-                                        <option value="Corporate Supplier Settlement">
-                                            PUR-01 • Corporate Supplier Settlement
-                                        </option>
-                                        <option value="Contractor Retainer & Milestone">
-                                            PUR-02 • Contractor Retainer & Milestone
-                                        </option>
-                                        <option value="Freight, Customs & Port Clearing">
-                                            PUR-03 • Freight, Customs & Port Clearing
-                                        </option>
-                                        <option value="Software & Cloud Infrastructure">
-                                            PUR-04 • Software & Cloud Infrastructure
-                                        </option>
-                                    </select>
-                                </div>
+                                            {/* Payment Method Selector (matching the personal flow) */}
+                                            <div className="space-y-1.5">
+                                                <label className="text-xs font-semibold text-black tracking-tight block">
+                                                    Payment Method
+                                                </label>
+                                                <div className="grid grid-cols-3 gap-2">
+                                                    {PAYMENT_METHODS.map((item) => {
+                                                        const isSelected = paymentMethod === item.id;
+                                                        const Icon = item.icon;
+                                                        return (
+                                                            <button
+                                                                key={item.id}
+                                                                type="button"
+                                                                onClick={() => setPaymentMethod(item.id)}
+                                                                className={`flex flex-col items-center justify-center p-2.5 rounded-lg border text-center transition-all cursor-pointer ${
+                                                                    isSelected
+                                                                        ? "border-black bg-black text-white shadow-xs"
+                                                                        : "border-[#E5E5E5] bg-white hover:border-black text-black"
+                                                                }`}
+                                                            >
+                                                                <Icon size={16} className="mb-1" />
+                                                                <span className="text-xs font-semibold">
+                                                                    {item.label}
+                                                                </span>
+                                                                <span
+                                                                    className={`text-[10px] mt-0.5 ${
+                                                                        isSelected
+                                                                            ? "text-zinc-300"
+                                                                            : "text-zinc-400"
+                                                                    }`}
+                                                                >
+                                                                    {item.note}
+                                                                </span>
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
 
-                                <label className="flex items-start gap-2.5 p-3 rounded-lg border border-[#E5E5E5] bg-zinc-50 cursor-pointer select-none mt-1 sm:mt-5">
-                                    <input
-                                        type="checkbox"
-                                        checked={requireCheckerApproval || parsedAmountUsd >= 50000}
-                                        onChange={(e) => setRequireCheckerApproval(e.target.checked)}
-                                        className="mt-0.5 h-4 w-4 rounded border-black accent-black cursor-pointer"
-                                    />
-                                    <div className="text-xs">
-                                        <p className="font-bold text-black">Stage for Checker Approval</p>
-                                        <p className="text-[11px] text-zinc-500 font-tabular-nums">
-                                            Auto-enforced for transfers &ge; $50,000 USD
-                                        </p>
-                                    </div>
-                                </label>
-                            </div>
+                                            {/* Funding Account Selector */}
+                                            {paymentMethod !== "mobile" ? (
+                                                <div className="space-y-1.5">
+                                                    <label className="text-xs font-semibold text-black block">
+                                                        Debit Funding Instrument
+                                                    </label>
+                                                    <select
+                                                        value={activeFundingSource?.id || ""}
+                                                        onChange={(e) => setSelectedFundingId(e.target.value)}
+                                                        className="w-full h-9 rounded-md border border-[#E5E5E5] bg-white px-3 text-xs font-medium text-black focus:border-black focus:outline-none"
+                                                    >
+                                                        {matchingFundingSources.map((fs) => (
+                                                            <option key={fs.id} value={fs.id}>
+                                                                {fs.institutionName} ({fs.accountLabel}) {fs.maskedNumber}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                            ) : (
+                                                <div className="border border-[#E5E5E5] rounded-md px-3 py-2 text-xs bg-zinc-50/50 flex items-center justify-between">
+                                                    <div className="flex items-center gap-2">
+                                                        <Smartphone size={14} className="text-black" />
+                                                        <span className="text-black font-medium">
+                                                            Pan-African Mobile Money Treasury Gateway
+                                                        </span>
+                                                    </div>
+                                                    <span className="text-[10px] font-mono text-zinc-500">
+                                                        Direct API Pull
+                                                    </span>
+                                                </div>
+                                            )}
 
-                            {/* Live Pass-Through Calculation Box */}
-                            <div className="rounded-xl border border-black bg-zinc-50 p-4 space-y-2.5 text-xs font-mono font-tabular-nums">
-                                <div className="flex items-center justify-between text-zinc-600">
-                                    <span>Correspondent Wholesale FX Rate</span>
-                                    <span className="font-bold text-black">
-                                        1.00 USD = {fxRate.toLocaleString("en-US", { minimumFractionDigits: 2 })}{" "}
-                                        {activeBeneficiary?.currencyCode}
-                                    </span>
-                                </div>
-                                <div className="flex items-center justify-between text-zinc-600">
-                                    <span>
-                                        Pass-Through Clearing Fee ({activeFundingSource?.feePercent}%)
-                                    </span>
-                                    <span className="font-bold text-black">
-                                        ${clearingFeeUsd.toLocaleString("en-US", { minimumFractionDigits: 2 })} USD
-                                    </span>
-                                </div>
-                                <div className="flex items-center justify-between text-zinc-600">
-                                    <span>Direct Pull from {activeFundingSource?.institutionName}</span>
-                                    <span className="font-bold text-black">
-                                        ${totalDirectDebitUsd.toLocaleString("en-US", { minimumFractionDigits: 2 })} USD
-                                    </span>
-                                </div>
-                                <div className="pt-2.5 border-t border-[#E5E5E5] flex items-center justify-between text-sm">
-                                    <span className="font-sans font-bold text-black">
-                                        Net Recipient Delivery ({activeBeneficiary?.currencyCode})
-                                    </span>
-                                    <span className="font-bold text-black text-base">
-                                        {activeBeneficiary?.currencySymbol}{" "}
-                                        {localPayoutAmount.toLocaleString("en-US", {
-                                            minimumFractionDigits: 2,
-                                            maximumFractionDigits: 2,
-                                        })}
-                                    </span>
-                                </div>
-                            </div>
+                                            {/* Conversion preview */}
+                                            <div className="border border-[#E5E5E5] rounded-md p-2.5 text-xs space-y-1 bg-white">
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-zinc-500">Recipient Receives</span>
+                                                    <span className="font-mono font-semibold text-black">
+                                                        {activeBeneficiary?.currencySymbol}{" "}
+                                                        {localPayoutAmount.toLocaleString("en-US", {
+                                                            minimumFractionDigits: 2,
+                                                            maximumFractionDigits: 2,
+                                                        })}{" "}
+                                                        {activeBeneficiary?.currencyCode}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center justify-between text-[11px] text-zinc-500 font-mono">
+                                                    <span>Rate: 1 USD = {fxRate} {activeBeneficiary?.currencyCode}</span>
+                                                    <span>Clearing Fee: ${clearingFeeUsd.toFixed(2)} USD</span>
+                                                </div>
+                                            </div>
 
-                            {/* Actions */}
-                            <div className="pt-2 flex flex-col-reverse sm:flex-row items-center justify-end gap-3">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={onClose}
-                                    className="w-full sm:w-auto border-[#E5E5E5] text-black hover:border-black cursor-pointer"
-                                >
-                                    Cancel
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    loading={isSubmitting}
-                                    loadingText="Authorizing Pass-Through..."
-                                    className="w-full sm:w-auto bg-black text-white hover:bg-zinc-800 px-6 cursor-pointer"
-                                >
-                                    <ShieldCheck size={15} />
-                                    <span>
-                                        {requireCheckerApproval || parsedAmountUsd >= 50000
-                                            ? "Submit for Checker Sign-Off"
-                                            : "Authorize Direct Pass-Through"}
-                                    </span>
-                                    <ArrowRight size={14} />
-                                </Button>
-                            </div>
-                        </form>
+                                            {/* Invoice / Reference */}
+                                            <div className="space-y-1">
+                                                <label className="text-xs font-semibold text-black block">
+                                                    Invoice Reference (Optional)
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={invoiceRef}
+                                                    onChange={(e) => setInvoiceRef(e.target.value)}
+                                                    placeholder="e.g. INV-2026-910"
+                                                    className="w-full h-8 px-3 rounded-md border border-[#E5E5E5] text-xs font-mono focus:border-black focus:outline-none bg-white text-black"
+                                                />
+                                            </div>
+
+                                            {/* Action Buttons */}
+                                            <div className="flex items-center justify-between pt-3 border-t border-[#E5E5E5]">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => navigateTo(0)}
+                                                    className="inline-flex items-center gap-1.5 px-3 h-9 rounded-md border border-[#E5E5E5] text-xs font-medium text-black hover:border-black transition-colors bg-white cursor-pointer"
+                                                >
+                                                    <ArrowLeft size={13} />
+                                                    <span>Back</span>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => navigateTo(2)}
+                                                    disabled={parsedAmountUsd <= 0}
+                                                    className="inline-flex items-center gap-1.5 bg-black text-white px-4 h-9 rounded-md text-xs font-medium hover:bg-zinc-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                                                >
+                                                    <span>Review</span>
+                                                    <ArrowRight size={13} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* ==================== STEP 3: AUTHORIZE ==================== */}
+                                    {step === 2 && !isComplete && (
+                                        <div className="space-y-4">
+                                            <div>
+                                                <h4 className="text-sm font-semibold text-black">
+                                                    Review & Authorize
+                                                </h4>
+                                                <p className="text-xs text-zinc-500 mt-0.5">
+                                                    Confirm transfer details before debiting your corporate account.
+                                                </p>
+                                            </div>
+
+                                            {/* Summary Breakdown */}
+                                            <div className="border border-[#E5E5E5] rounded-md divide-y divide-[#E5E5E5] text-xs bg-white">
+                                                <div className="p-2.5 flex justify-between">
+                                                    <span className="text-zinc-500">Recipient</span>
+                                                    <span className="font-semibold text-black">
+                                                        {activeBeneficiary?.entityName}
+                                                    </span>
+                                                </div>
+                                                <div className="p-2.5 flex justify-between">
+                                                    <span className="text-zinc-500">Payment Method</span>
+                                                    <span className="font-medium text-black capitalize">
+                                                        {paymentMethod === "bank"
+                                                            ? "Bank Transfer"
+                                                            : paymentMethod === "card"
+                                                              ? "Debit Card"
+                                                              : "Mobile Money"}
+                                                    </span>
+                                                </div>
+                                                <div className="p-2.5 flex justify-between">
+                                                    <span className="text-zinc-500">Delivery Amount</span>
+                                                    <span className="font-mono font-semibold text-black">
+                                                        {activeBeneficiary?.currencySymbol}{" "}
+                                                        {localPayoutAmount.toLocaleString("en-US", {
+                                                            minimumFractionDigits: 2,
+                                                            maximumFractionDigits: 2,
+                                                        })}{" "}
+                                                        {activeBeneficiary?.currencyCode}
+                                                    </span>
+                                                </div>
+                                                <div className="p-2.5 flex justify-between">
+                                                    <span className="text-zinc-500">Total Debit (USD)</span>
+                                                    <span className="font-mono font-semibold text-black">
+                                                        ${totalDirectDebitUsd.toLocaleString("en-US", {
+                                                            minimumFractionDigits: 2,
+                                                            maximumFractionDigits: 2,
+                                                        })}
+                                                    </span>
+                                                </div>
+                                                <div className="p-2.5 flex justify-between">
+                                                    <span className="text-zinc-500">Funding Rail</span>
+                                                    <span className="font-mono text-black">
+                                                        {paymentMethod === "mobile"
+                                                            ? "Mobile Money Partner Rail"
+                                                            : `${activeFundingSource?.institutionName} ${activeFundingSource?.maskedNumber}`}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            {/* Security confirmation */}
+                                            <div className="border border-[#E5E5E5] rounded-md p-3 space-y-2.5 bg-white">
+                                                <div className="flex items-center gap-1.5 text-xs font-semibold text-black">
+                                                    <Lock size={13} />
+                                                    <span>Security PIN Confirmation</span>
+                                                </div>
+
+                                                <div className="flex items-center gap-2">
+                                                    <input
+                                                        type="password"
+                                                        maxLength={6}
+                                                        value={securityCode}
+                                                        onChange={(e) =>
+                                                            setSecurityCode(e.target.value.replace(/\D/g, ""))
+                                                        }
+                                                        placeholder="Enter 6-digit PIN"
+                                                        className="flex-1 h-9 px-3 rounded-md border border-[#E5E5E5] text-xs font-mono tracking-widest focus:border-black focus:outline-none bg-white text-black"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setSecurityCode("123456")}
+                                                        className="px-2.5 h-9 rounded-md border border-[#E5E5E5] text-xs font-mono text-zinc-500 hover:text-black hover:border-black transition-colors shrink-0 cursor-pointer"
+                                                    >
+                                                        Auto-fill
+                                                    </button>
+                                                </div>
+
+                                                <label className="flex items-start gap-2 text-xs text-zinc-600 cursor-pointer pt-0.5 select-none">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={confirmedTerms}
+                                                        onChange={(e) => setConfirmedTerms(e.target.checked)}
+                                                        className="w-3.5 h-3.5 mt-0.5 accent-black rounded border-[#E5E5E5]"
+                                                    />
+                                                    <span>I authorize direct pass-through debit.</span>
+                                                </label>
+                                            </div>
+
+                                            {/* Action Buttons */}
+                                            <div className="flex items-center justify-between pt-3 border-t border-[#E5E5E5]">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => navigateTo(1)}
+                                                    disabled={isProcessing}
+                                                    className="inline-flex items-center gap-1.5 px-3 h-9 rounded-md border border-[#E5E5E5] text-xs font-medium text-black hover:border-black transition-colors bg-white cursor-pointer"
+                                                >
+                                                    <ArrowLeft size={13} />
+                                                    <span>Back</span>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={handleAuthorize}
+                                                    disabled={
+                                                        !confirmedTerms ||
+                                                        securityCode.length < 6 ||
+                                                        isProcessing
+                                                    }
+                                                    className="inline-flex items-center gap-1.5 bg-black text-white px-5 h-9 rounded-md text-xs font-semibold hover:bg-zinc-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                                                >
+                                                    {isProcessing ? (
+                                                        <>
+                                                            <RefreshCw size={13} className="animate-spin" />
+                                                            <span>Authorizing…</span>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <ShieldCheck size={14} />
+                                                            <span>Authorize Payment</span>
+                                                        </>
+                                                    )}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* ==================== SUCCESS STATE ==================== */}
+                                    {isComplete && (
+                                        <div className="py-6 flex flex-col items-center text-center space-y-3">
+                                            <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
+                                                <Check size={20} strokeWidth={2.5} />
+                                            </div>
+
+                                            <div>
+                                                <h4 className="text-base font-semibold tracking-tight text-black">
+                                                    Transfer Authorized & Clearing
+                                                </h4>
+                                                <p className="text-xs text-zinc-500 mt-1">
+                                                    ${parsedAmountUsd.toLocaleString("en-US", { minimumFractionDigits: 2 })} USD has been routed to {activeBeneficiary?.entityName}.
+                                                </p>
+                                            </div>
+
+                                            <div className="border border-[#E5E5E5] rounded px-3 py-1.5 font-mono text-xs text-black">
+                                                Ref: <span className="font-bold">{createdRef}</span>
+                                            </div>
+
+                                            <div className="pt-3">
+                                                <button
+                                                    type="button"
+                                                    onClick={onClose}
+                                                    className="bg-black text-white px-6 h-9 rounded-md text-xs font-semibold hover:bg-zinc-800 transition-colors cursor-pointer"
+                                                >
+                                                    Done
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </motion.div>
+                            </AnimatePresence>
+                        </div>
                     </motion.div>
                 </div>
             )}
@@ -431,3 +807,4 @@ export function NewSingleTransferModal({
     );
 }
 
+export default NewSingleTransferModal;
