@@ -429,9 +429,7 @@ export function TeamPermissionsPage() {
                                                             <p className="text-[11px] font-mono text-zinc-500">
                                                                 {member.email}
                                                             </p>
-                                                            <p className="text-[11px] text-zinc-400 mt-0.5">
-                                                                {member.department}
-                                                            </p>
+                                                            
                                                         </div>
                                                     </div>
                                                 </td>
@@ -463,11 +461,7 @@ export function TeamPermissionsPage() {
                                                             ? "Unlimited Authority"
                                                             : `Up to $${member.authorizationLimitUsd.toLocaleString("en-US")} USD`}
                                                     </p>
-                                                    <p className="text-[10px] text-zinc-500 mt-0.5">
-                                                        {member.role === "Finance/Maker"
-                                                            ? "Single initiation cap"
-                                                            : "Per-batch sign-off cap"}
-                                                    </p>
+                                                    
                                                 </td>
 
                                                 <td className="py-4 px-5 align-top">
@@ -509,9 +503,7 @@ export function TeamPermissionsPage() {
                                                             <span>Pending Invite</span>
                                                         </span>
                                                     )}
-                                                    <p className="text-[10px] font-mono text-zinc-400 mt-1">
-                                                        {member.lastActive}
-                                                    </p>
+                                                    
                                                 </td>
 
                                                 <td className="py-4 px-5 align-top text-right whitespace-nowrap">

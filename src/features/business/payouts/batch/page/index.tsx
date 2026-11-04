@@ -725,13 +725,7 @@ export function BatchPayoutPage() {
                                                     {row.recipientName}
                                                 </span>
                                             </div>
-                                            <div className="flex items-center gap-2 mt-1 text-[11px] font-mono text-zinc-500 font-tabular-nums">
-                                                <span>{row.category}</span>
-                                                <span>&bull;</span>
-                                                <span>{row.taxReference}</span>
-                                                <span>&bull;</span>
-                                                <span>{row.invoiceRef}</span>
-                                            </div>
+                                            
                                         </td>
 
                                         <td className="py-4 px-4 align-top whitespace-nowrap">
@@ -741,9 +735,7 @@ export function BatchPayoutPage() {
                                                     {row.country} ({row.currencyCode})
                                                 </span>
                                             </div>
-                                            <p className="text-[11px] font-mono text-zinc-500 mt-0.5">
-                                                {row.institutionName} ({row.payoutMethod})
-                                            </p>
+                                            
                                         </td>
 
                                         <td className="py-4 px-4 align-top whitespace-nowrap font-mono font-tabular-nums">
@@ -781,13 +773,7 @@ export function BatchPayoutPage() {
                                             <p className="font-bold text-black text-sm">
                                                 ${row.amountUsd.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                                             </p>
-                                            <p className="text-[11px] text-zinc-500 mt-0.5">
-                                                {row.currencySymbol}{" "}
-                                                {row.amountLocal.toLocaleString("en-US", {
-                                                    minimumFractionDigits: 2,
-                                                    maximumFractionDigits: 2,
-                                                })}
-                                            </p>
+                                            
                                         </td>
 
                                         <td className="py-4 px-4 align-top min-w-[230px]">

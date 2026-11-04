@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { usePathname } from "next/navigation";
 import { Sidebar } from "@/components/shared/layout/Sidebar";
 import { Topbar } from "@/components/shared/layout/Topbar";
 import { CurrencyProvider } from "@/features/currency/CurrencyContext";
@@ -9,14 +8,12 @@ import { BusinessProvider } from "@/features/business/context/BusinessContext";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const pathname = usePathname();
-    const isBusinessRoute = pathname?.startsWith("/business");
 
     return (
         <CurrencyProvider>
             <BusinessProvider>
-                <div className={isBusinessRoute ? "min-h-screen bg-white text-black" : "min-h-screen bg-[#FAFAFA]"}>
-                    {/* Global Sidebar (Handles Personal & Business navigation + Account Switcher) */}
+                <div className="min-h-screen bg-[#FAFAFA]">
+                    {/* Personal Sidebar */}
                     <Sidebar
                         isOpen={isMobileMenuOpen}
                         onClose={() => setIsMobileMenuOpen(false)}

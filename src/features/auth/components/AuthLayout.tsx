@@ -28,7 +28,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
                 </div>
 
                 <div className="text-[11px] text-zinc-400 font-mono font-tabular-nums tabular-nums">
-                    &copy; {new Date().getFullYear()} Settle Africa
+                    2026 Settle Africa
                 </div>
             </footer>
         </div>
