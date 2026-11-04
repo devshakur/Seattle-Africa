@@ -56,7 +56,7 @@ export function LoginForm() {
                 setPhoneNumber(target === "business" ? "8094421900" : "8031234567");
                 setEmail(
                     target === "business"
-                        ? "amina.yusuf@koralogistics.africa"
+                        ? "abdulshakur.dauda@koralogistics.africa"
                         : "devshakur@settleafrica.com"
                 );
                 setPassword("SettleAfrica2026!");

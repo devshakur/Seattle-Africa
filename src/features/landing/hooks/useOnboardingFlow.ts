@@ -44,7 +44,7 @@ export function useOnboardingFlow() {
                 setError("Account not found. Please check the number.");
             } else {
                 // Mock successful resolution
-                setAccountName("Amina Yusuf");
+                setAccountName("Abdulshakur Dauda");
             }
             setIsFetchingAccount(false);
         }, 1500);

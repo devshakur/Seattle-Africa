@@ -67,7 +67,7 @@ export function StepRecipient({
             setIsVerifying(true);
             const timer = setTimeout(() => {
                 const sampleNames = [
-                    "Amina Yusuf",
+                    "Abdulshakur Dauda",
                     "Chinedu Okafor",
                     "Kwame Mensah",
                     "David Osei",
@@ -162,7 +162,7 @@ export function StepRecipient({
                     </div>
                     <Input
                         id="recipient-name"
-                        placeholder={isVerifying ? "Verifying account name..." : "e.g. Amina Yusuf"}
+                        placeholder={isVerifying ? "Verifying account name..." : "e.g. Abdulshakur Dauda"}
                         value={accountName}
                         disabled={isVerifying}
                         onChange={(e) => setAccountName(e.target.value)}

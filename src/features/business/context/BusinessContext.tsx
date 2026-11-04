@@ -316,7 +316,7 @@ export const INITIAL_CORPORATE_TRANSFERS: CorporateTransferItem[] = [
         payoutPartnerRail: "NIP Instant Interbank Rail",
         status: "clearing",
         initiatedBy: "Tunde Bakare (Finance/Maker)",
-        approvedBy: "Amina Yusuf (Admin)",
+        approvedBy: "Abdulshakur Dauda (Admin)",
         clearingStage: 2,
     },
     {
@@ -390,8 +390,8 @@ export const INITIAL_CORPORATE_TRANSFERS: CorporateTransferItem[] = [
         fundingSourceRail: "Direct RTGS Pass-Through",
         payoutPartnerRail: "SARB PayShap / RTC Clearing",
         status: "completed",
-        initiatedBy: "Amina Yusuf (Admin)",
-        approvedBy: "Amina Yusuf (Admin)",
+        initiatedBy: "Abdulshakur Dauda (Admin)",
+        approvedBy: "Abdulshakur Dauda (Admin)",
         clearingStage: 3,
     },
     {
@@ -425,9 +425,9 @@ export const INITIAL_CORPORATE_TRANSFERS: CorporateTransferItem[] = [
 export const INITIAL_TEAM_MEMBERS: TeamMember[] = [
     {
         id: "tm-1",
-        fullName: "Amina Yusuf",
-        initials: "AY",
-        email: "amina.yusuf@koralogistics.africa",
+        fullName: "Abdulshakur Dauda",
+        initials: "AD",
+        email: "abdulshakur.dauda@koralogistics.africa",
         department: "Executive / Chief Financial Officer",
         role: "Admin",
         status: "Active",
@@ -1015,7 +1015,7 @@ export function BusinessProvider({ children }: { children: ReactNode }) {
                     ? {
                           ...tx,
                           status: "completed",
-                          approvedBy: "Amina Yusuf (Admin)",
+                          approvedBy: "Abdulshakur Dauda (Admin)",
                           clearingStage: 3,
                           timestamp: "Approved • Just now",
                       }
@@ -1066,8 +1066,8 @@ export function BusinessProvider({ children }: { children: ReactNode }) {
             fundingSourceRail: fundingSource.rail,
             payoutPartnerRail: "Direct Pass-Through Multi-Corridor API",
             status: "clearing",
-            initiatedBy: "Amina Yusuf (Admin)",
-            approvedBy: "Amina Yusuf (Admin)",
+            initiatedBy: "Abdulshakur Dauda (Admin)",
+            approvedBy: "Abdulshakur Dauda (Admin)",
             recipientCount: validRows.length,
             clearingStage: 2,
         };
